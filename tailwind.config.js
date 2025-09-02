@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-import animate from 'tailwindcss-animate'
+import animate from 'tailwindcss-animate';
 
 module.exports = {
   content: [
