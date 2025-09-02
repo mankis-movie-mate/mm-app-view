@@ -7,15 +7,17 @@ import { Spinner } from '@/components/Spinner';
 import { DetailedMovie } from '@/types/movie';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import Image from 'next/image';
 import { useState } from 'react';
 import { Star } from 'lucide-react';
+import { AddToWatchlistsDialog } from '@/components/AddToWatchlistsDialog';
+import { Button } from '@/components/ui/button';
 
 export default function MoviePage() {
     const { id } = useParams();
     const [watchlisted, setWatchlisted] = useState(false);
     const [userRating, setUserRating] = useState<number | null>(null);
     const [comment, setComment] = useState('');
+    const [dialogOpen, setDialogOpen] = useState(false);
 
     const { data, isLoading, isError } = useQuery<DetailedMovie>({
         queryKey: ['movie', id],
@@ -52,16 +54,11 @@ export default function MoviePage() {
         posterUrl,
     } = data;
 
-    const handleWatchlistToggle = () => {
-        setWatchlisted((prev) => !prev);
-    };
-
-    const handleRatingClick = (value: number) => {
-        setUserRating(value);
-    };
+    const handleRatingClick = (value: number) => setUserRating(value);
 
     const handleCommentSubmit = () => {
         if (!userRating || !comment.trim()) return;
+        // TODO: POST to your review endpoint
         console.log('Submitting review:', { userRating, comment });
         setComment('');
         setUserRating(null);
@@ -74,6 +71,7 @@ export default function MoviePage() {
                 <div className="flex flex-col md:flex-row gap-6">
                     <div className="relative aspect-[2/3] w-full max-w-[240px] overflow-hidden rounded-xl bg-black/30">
                         {posterUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                                 src={posterUrl}
                                 alt={title}
@@ -89,7 +87,8 @@ export default function MoviePage() {
                     <div className="flex-1 space-y-4">
                         <h1 className="text-3xl font-bold">{title}</h1>
                         <div className="text-sm text-white/70">
-                            {new Date(releaseDate).getFullYear()} · {language} · {genres.join(', ')}
+                            {releaseDate ? new Date(releaseDate).getFullYear() : '—'} · {language} ·{' '}
+                            {genres.map((g) => g.name).join(', ')}
                         </div>
 
                         <p className="text-white/80">{synopsis}</p>
@@ -106,21 +105,30 @@ export default function MoviePage() {
                             <strong>Rating:</strong> {rating.average.toFixed(1)} ({rating.count} reviews)
                         </div>
 
-                        <div className="mt-4 flex gap-4">
-                            <button
-                                className={`px-4 py-2 rounded-md text-sm font-medium ${watchlisted ? 'bg-green-600' : 'bg-indigo-600'}`}
-                                onClick={handleWatchlistToggle}
-                            >
-                                {watchlisted ? '✓ In Watchlist' : '+ Add to Watchlist'}
-                            </button>
+                        <div className="mt-4 flex gap-3">
+                            {/* The visible button + dialog */}
+                            <AddToWatchlistsDialog
+                                movieId={id as string}
+                                open={dialogOpen}
+                                onOpenChange={setDialogOpen}
+                                trigger={
+                                    <Button
+                                        className="bg-indigo-600 hover:bg-indigo-700"
+                                        onClick={() => setDialogOpen(true)}
+                                    >
+                                        + Add to Watchlist
+                                    </Button>
+                                }
+                            />
                         </div>
                     </div>
                 </div>
 
+                {/* — Reviews — */}
                 <div className="mt-12">
                     <h2 className="text-xl font-semibold mb-2">Leave a Review</h2>
                     <div className="mb-2 flex items-center gap-1">
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
+                        {[1,2,3,4,5,6,7,8,9,10].map((star) => (
                             <Star
                                 key={star}
                                 size={20}
@@ -137,13 +145,13 @@ export default function MoviePage() {
                         rows={4}
                         placeholder="Write your review..."
                     />
-                    <button
+                    <Button
                         onClick={handleCommentSubmit}
                         disabled={!userRating || !comment.trim()}
-                        className="mt-2 px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-700 disabled:bg-gray-500 rounded-md text-sm font-semibold"
+                        className="mt-4 bg-fuchsia-600 hover:bg-fuchsia-700"
                     >
-                        Submit Review
-                    </button>
+                        ✍️ Submit Review
+                    </Button>
                 </div>
 
                 {reviews.length > 0 && (

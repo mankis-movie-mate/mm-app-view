@@ -14,9 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 const PAGE_SIZE = 8;
 
 export default function RecommendPage() {
-  return (
-      <PageContent />
-  );
+  return <PageContent />;
 }
 
 function PageContent() {
@@ -84,7 +82,7 @@ function PageContent() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search movies (e.g. 'cozy sci-fi from 90s')"
+              placeholder="Search movies"
               className="w-full rounded-2xl bg-white/10 px-5 py-3 text-base text-white placeholder:text-white/50 outline-none ring-1 ring-white/15 focus:ring-2 focus:ring-indigo-400 transition"
             />
             {isSearching && (

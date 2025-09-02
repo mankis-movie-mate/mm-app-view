@@ -1,11 +1,65 @@
-import type { DetailedMovie } from '@/types/movie';
+// src/lib/mock/movieMockData.ts
+import type { DetailedMovie, Genre } from '@/types/movie';
+
+// ───────────────────────────────────────────────────────────────────────────────
+// Genre catalog (source of truth for mocks)
+// ───────────────────────────────────────────────────────────────────────────────
+
+// Use stable, URL-safe ids (good for keys, filters, URLs)
+const G = (id: string, name: string): Genre => ({ id, name });
+
+export const mockGenres: Genre[] = [
+    G('sci-fi', 'Sci-Fi'),
+    G('thriller', 'Thriller'),
+    G('action', 'Action'),
+    G('animation', 'Animation'),
+    G('fantasy', 'Fantasy'),
+    G('drama', 'Drama'),
+    G('comedy', 'Comedy'),
+];
+
+// Fast lookup maps
+const genreById = new Map(mockGenres.map((g) => [g.id, g]));
+const genreByName = new Map(mockGenres.map((g) => [g.name, g]));
+
+// Helper getters (defensive: create fallback on the fly if needed)
+const getGenreById = (id: string): Genre =>
+    genreById.get(id) ?? { id, name: id };
+
+const getGenreByName = (name: string): Genre =>
+    genreByName.get(name) ?? { id: name.toLowerCase(), name };
+
+// ───────────────────────────────────────────────────────────────────────────────
+// Genre → movie id mapping (keys = genre ids)
+// ───────────────────────────────────────────────────────────────────────────────
+
+export const mockMovieIdsByGenre: Record<string, string[]> = {
+    'sci-fi': ['m1', 'm2'],
+    thriller: ['m1', 'm4'],
+    action: ['m2'],
+    animation: ['m3'],
+    fantasy: ['m3'],
+    drama: ['m4', 'm5'],
+    comedy: ['m5'],
+};
+
+// For quick “top” lists in UI (cards, chips, etc.)
+export const mockTopGenres: Genre[] = [
+    getGenreById('sci-fi'),
+    getGenreById('drama'),
+    getGenreById('thriller'),
+];
+
+// ───────────────────────────────────────────────────────────────────────────────
+// Detailed movies (now using Genre[] instead of string[])
+// ───────────────────────────────────────────────────────────────────────────────
 
 export function mockDetailedMovie(id: string): DetailedMovie {
     const movies: Record<string, DetailedMovie> = {
         m1: {
             id: 'm1',
             title: 'Inception',
-            genres: ['Sci-Fi', 'Thriller'],
+            genres: [getGenreByName('Sci-Fi'), getGenreByName('Thriller')],
             director: { firstName: 'Christopher', lastName: 'Nolan' },
             casts: [
                 { firstName: 'Leonardo', lastName: 'DiCaprio' },
@@ -36,7 +90,7 @@ export function mockDetailedMovie(id: string): DetailedMovie {
         m2: {
             id: 'm2',
             title: 'The Matrix',
-            genres: ['Sci-Fi', 'Action'],
+            genres: [getGenreByName('Sci-Fi'), getGenreByName('Action')],
             director: { firstName: 'Lana', lastName: 'Wachowski' },
             casts: [
                 { firstName: 'Keanu', lastName: 'Reeves' },
@@ -67,7 +121,7 @@ export function mockDetailedMovie(id: string): DetailedMovie {
         m3: {
             id: 'm3',
             title: 'Spirited Away',
-            genres: ['Animation', 'Fantasy'],
+            genres: [getGenreByName('Animation'), getGenreByName('Fantasy')],
             director: { firstName: 'Hayao', lastName: 'Miyazaki' },
             casts: [],
             synopsis:
@@ -89,7 +143,7 @@ export function mockDetailedMovie(id: string): DetailedMovie {
         m4: {
             id: 'm4',
             title: 'Parasite',
-            genres: ['Drama', 'Thriller'],
+            genres: [getGenreByName('Drama'), getGenreByName('Thriller')],
             director: { firstName: 'Bong', lastName: 'Joon-ho' },
             casts: [
                 { firstName: 'Song', lastName: 'Kang-ho' },
@@ -120,7 +174,7 @@ export function mockDetailedMovie(id: string): DetailedMovie {
         m5: {
             id: 'm5',
             title: 'The Grand Budapest Hotel',
-            genres: ['Comedy', 'Drama'],
+            genres: [getGenreByName('Comedy'), getGenreByName('Drama')],
             director: { firstName: 'Wes', lastName: 'Anderson' },
             casts: [
                 { firstName: 'Ralph', lastName: 'Fiennes' },
@@ -147,7 +201,7 @@ export function mockDetailedMovie(id: string): DetailedMovie {
         movies[id] || {
             id,
             title: 'Unknown Movie',
-            genres: [],
+            genres: [], // empty Genre[]
             director: { firstName: 'Unknown', lastName: 'Director' },
             casts: [],
             synopsis: 'No synopsis available.',
@@ -159,3 +213,11 @@ export function mockDetailedMovie(id: string): DetailedMovie {
         }
     );
 }
+
+export const mockDetailedMovies: DetailedMovie[] = [
+    mockDetailedMovie('m1'),
+    mockDetailedMovie('m2'),
+    mockDetailedMovie('m3'),
+    mockDetailedMovie('m4'),
+    mockDetailedMovie('m5'),
+];

@@ -1,5 +1,6 @@
 import type { RecommendedItem } from '@/types/movie';
 import MovieCard from './MovieCard';
+import {detailedMovieFromMovie} from "@/types/mapper/watchlistMapper";
 
 export default function RecommendationCard({ rec }: { rec: RecommendedItem }) {
   const { movie, score, explanations } = rec;
@@ -10,7 +11,7 @@ export default function RecommendationCard({ rec }: { rec: RecommendedItem }) {
     <div className="rounded-xl bg-white/5 p-2 ring-1 ring-white/10 backdrop-blur-sm">
       {/* Movie tile */}
       <div className="relative">
-        <MovieCard movie={movie} />
+        <MovieCard movie={detailedMovieFromMovie(movie)} />
         <span
           className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-xs font-semibold shadow-lg ${
             isTopMovie ? 'bg-gray-700/80 text-white/80' : 'bg-indigo-600/90'

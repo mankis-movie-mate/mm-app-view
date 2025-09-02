@@ -4,5 +4,5 @@ export const ROUTES = {
   LOGIN: '/login',
   REGISTER: '/register',
   PROFILE: '/profile',
-  MOVIE_DETAILS_PREFIX: '/movie'
+  MOVIE_DETAILS_PREFIX: '/movie',
 };
