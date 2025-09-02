@@ -9,14 +9,11 @@ export default function Header() {
 
   return (
     <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-8">
-      <div className="flex items-center gap-3"
-      >
-          <Link
-              href={ROUTES.HOME}
-          >
-        <span className="text-2xl">🎬</span>
-        <span className="font-semibold tracking-tight">MovieMate</span>
-          </Link>
+      <div className="flex items-center gap-3">
+        <Link href={ROUTES.HOME}>
+          <span className="text-2xl">🎬</span>
+          <span className="font-semibold tracking-tight">MovieMate</span>
+        </Link>
       </div>
 
       <nav className="flex items-center gap-3">

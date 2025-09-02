@@ -1,6 +1,6 @@
 import type { ApiError } from '@/types/api';
 import { refreshToken as refreshAccessToken } from '@/lib/api/authApi';
-import {ROUTES} from "@/lib/constants/routes";
+import { ROUTES } from '@/lib/constants/routes';
 
 // Accepts the request, parses response, throws typed errors
 export async function fetchApi<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
@@ -79,7 +79,9 @@ export async function fetchApiWithAuth<T>(input: RequestInfo, init: RequestInit 
       if (!didRefresh) {
         console.warn('Redirecting to login...');
         window.location.href = ROUTES.LOGIN;
-        return Promise.reject(new Error('Session expired / token malformed. Redirecting to login.'));
+        return Promise.reject(
+          new Error('Session expired / token malformed. Redirecting to login.'),
+        );
       }
 
       // Retry the original request with new token

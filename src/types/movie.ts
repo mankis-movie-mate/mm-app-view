@@ -8,12 +8,41 @@ export interface RecommendationExplanation {
   activityType: ActivityType;
 }
 
-export interface Movie {
+export interface Cast {
+  firstName: string;
+  lastName: string;
+}
+
+export interface Director {
+  firstName: string;
+  lastName: string;
+}
+
+export interface Review {
+  user: string;
+  comment: string;
+  rating: number;
+  dateCreated: string; // ISO string
+}
+
+export interface Rating {
+  average: number;
+  count: number;
+}
+
+export interface Movie { id: string; title: string; genres: string[]; releaseYear: number; rating?: number | null; posterUrl?: string | null; }
+
+export interface DetailedMovie {
   id: string;
   title: string;
   genres: string[];
-  releaseYear: number;
-  rating?: number | null;
+  director: Director;
+  casts: Cast[];
+  synopsis?: string;
+  releaseDate?: string;
+  language?: string;
+  rating: Rating;
+  reviews: Review[];
   posterUrl?: string | null;
 }
 

@@ -23,7 +23,7 @@ export interface RegisterInput {
 
 export interface RefreshTokenResponse {
   accessToken: string;
-  refreshToken:string
+  refreshToken: string;
 }
 
 export async function register(data: RegisterInput): Promise<AuthResponse> {
@@ -35,8 +35,11 @@ export async function register(data: RegisterInput): Promise<AuthResponse> {
 }
 
 export async function refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
-  return fetchApi<RefreshTokenResponse>(`${process.env.NEXT_PUBLIC_AUTH_URL}/refresh-token?refreshToken=${refreshToken}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-  });
+  return fetchApi<RefreshTokenResponse>(
+    `${process.env.NEXT_PUBLIC_AUTH_URL}/refresh-token?refreshToken=${refreshToken}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
 }

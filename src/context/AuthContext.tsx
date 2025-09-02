@@ -1,8 +1,8 @@
 'use client';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserDetails } from '@/types/auth';
-import {useRouter} from "next/navigation";
-import {ROUTES} from "@/lib/constants/routes";
+import { useRouter } from 'next/navigation';
+import { ROUTES } from '@/lib/constants/routes';
 
 interface AuthContextType {
   user: any;
@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
-    router.push(ROUTES.HOME)
+    router.push(ROUTES.HOME);
   };
 
   return (
