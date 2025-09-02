@@ -1,16 +1,18 @@
-// src/app/recommend/page.tsx
-"use client";
+'use client';
 
-import React, { useEffect, useMemo, useState } from "react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import MovieCard from "@/components/MovieCard";
-import RecommendationCard from "@/components/RecommendationCard";
-import { Spinner } from "@/components/Spinner";
-import { Skeleton } from "@/components/Skeleton";
-import { searchMovies, getRecommendations } from "@/lib/api/moviesApi";
-import type { Movie, RecommendationsResponse } from "@/types/movie";
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import React, { useEffect, useMemo, useState } from 'react';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import MovieCard from '@/components/MovieCard';
+import RecommendationCard from '@/components/RecommendationCard';
+import { Spinner } from '@/components/Spinner';
+import { Skeleton } from '@/components/Skeleton';
+import { searchMovies, getRecommendations } from '@/lib/api/moviesApi';
+import type { Movie, RecommendationsResponse } from '@/types/movie';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
+import {useAuth} from "@/context/AuthContext";
+
+const PAGE_SIZE = 8;
 
 export default function RecommendPage() {
     const [client] = useState(() => new QueryClient());
@@ -22,45 +24,64 @@ export default function RecommendPage() {
 }
 
 function PageContent() {
-    const [query, setQuery] = useState("");
+    const [query, setQuery] = useState('');
+    const [page, setPage] = useState(1);
     const debounced = useDebouncedValue(query, 350);
+    const { user } = useAuth();
 
-    // Search
+    useEffect(() => {
+        setPage(1); // reset to first page when query changes
+    }, [debounced]);
+
     const {
         data: results,
         isFetching: isSearching,
         isError: isSearchError,
         error: searchError,
-    } = useQuery({
-        queryKey: ["movies", "search", debounced],
+    } = useQuery<Movie[]>({
+        queryKey: ['movies', 'search', debounced],
         queryFn: () => searchMovies(debounced),
         enabled: debounced.trim().length > 0,
         staleTime: 30_000,
     });
 
-    // Recommendations (matches your payload shape)
     const {
         data: recResp,
         isFetching: isRecsLoading,
         isError: isRecsError,
         error: recsError,
     } = useQuery<RecommendationsResponse>({
-        queryKey: ["movies", "recommendations"],
-        queryFn: () => getRecommendations(), // pass userId if needed
+        queryKey: ['movies', 'recommendations'],
+        queryFn: () => getRecommendations(user.id),
         staleTime: 60_000,
     });
 
     const recs = recResp?.recommended ?? [];
 
+    const paginatedResults = useMemo(() => {
+        if (!results) return [];
+        const start = (page - 1) * PAGE_SIZE;
+        return results.slice(start, start + PAGE_SIZE);
+    }, [results, page]);
+
+    const totalPages = useMemo(() => {
+        return results ? Math.ceil(results.length / PAGE_SIZE) : 0;
+    }, [results]);
+
     return (
         <main className="relative min-h-[100svh] overflow-hidden bg-gradient-to-b from-indigo-950 via-slate-950 to-black text-white">
-            {/* Ambient blobs */}
-            <div aria-hidden className="pointer-events-none absolute -top-40 right-[-20%] h-[480px] w-[480px] rounded-full bg-indigo-600/25 blur-3xl" />
-            <div aria-hidden className="pointer-events-none absolute -bottom-40 left-[-10%] h-[520px] w-[520px] rounded-full bg-fuchsia-600/20 blur-3xl" />
+            <div
+                aria-hidden
+                className="pointer-events-none absolute -top-40 right-[-20%] h-[480px] w-[480px] rounded-full bg-indigo-600/25 blur-3xl"
+            />
+            <div
+                aria-hidden
+                className="pointer-events-none absolute -bottom-40 left-[-10%] h-[520px] w-[520px] rounded-full bg-fuchsia-600/20 blur-3xl"
+            />
 
             <Header />
 
-            {/* Search Bar */}
+            {/* Search */}
             <section className="mx-auto max-w-6xl px-6 pt-4">
                 <div className="flex items-center gap-3">
                     <div className="relative w-full">
@@ -79,47 +100,64 @@ function PageContent() {
                 </div>
             </section>
 
-            {/* Main: results + sidebar */}
-            <section className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-6 pb-8 pt-6 md:grid-cols-[1fr_340px]">
-                {/* RESULTS */}
+            {/* Main section */}
+            <section className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-6 pb-8 pt-6 md:grid-cols-[1fr_270px]">
+                {/* Search Results */}
                 <div>
                     <h2 className="mb-3 text-sm font-semibold text-white/70">
-                        {debounced ? `Results for “${debounced}”` : "Try a search to see results"}
+                        {debounced ? `Results for “${debounced}”` : 'Try a search to see results'}
                     </h2>
 
                     {isSearching && <ResultsSkeleton />}
 
                     {isSearchError && (
-                        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
-                            {(searchError as any)?.message ?? "Failed to load search results."}
-                        </div>
+                        <ErrorBox message={(searchError as any)?.message ?? 'Failed to load search results.'} />
                     )}
 
-                    {!isSearching && debounced && (results?.length ?? 0) === 0 && (
-                        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-sm text-white/70">
-                            No results. Try a different query (e.g. “space drama”, “thriller 2019”).
-                        </div>
+                    {!isSearching && debounced && results?.length === 0 && (
+                        <InfoBox message="No results. Try a different query (e.g. “space drama”, “thriller 2019”)." />
                     )}
 
                     {!isSearching && results && results.length > 0 && (
-                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                            {results.map((m: Movie) => (
-                                <MovieCard key={m.id} movie={m} />
-                            ))}
-                        </div>
+                        <>
+                            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                                {paginatedResults.map((m: Movie) => (
+                                    <MovieCard key={m.id} movie={m} />
+                                ))}
+                            </div>
+
+                            {/* Pagination */}
+                            <div className="mt-6 flex justify-center gap-3 text-sm">
+                                <button
+                                    disabled={page <= 1}
+                                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                    className="rounded-lg border border-white/20 px-4 py-1.5 text-white/80 hover:bg-white/10 disabled:opacity-50"
+                                >
+                                    Prev
+                                </button>
+                                <span className="self-center text-white/60">
+                  Page {page} of {totalPages}
+                </span>
+                                <button
+                                    disabled={page >= totalPages}
+                                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                                    className="rounded-lg border border-white/20 px-4 py-1.5 text-white/80 hover:bg-white/10 disabled:opacity-50"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </>
                     )}
                 </div>
 
-                {/* SIDEBAR: Recommendations */}
+                {/* Recommendations */}
                 <aside className="md:sticky md:top-[88px]">
                     <h2 className="mb-3 text-sm font-semibold text-white/70">Recommended for you</h2>
 
                     {isRecsLoading && <RecsSkeleton />}
 
                     {isRecsError && (
-                        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
-                            {(recsError as any)?.message ?? "Failed to load recommendations."}
-                        </div>
+                        <ErrorBox message={(recsError as any)?.message ?? 'Failed to load recommendations.'} />
                     )}
 
                     {!isRecsLoading && recs && recs.length > 0 && (
@@ -137,9 +175,9 @@ function PageContent() {
     );
 }
 
-/* ---------------- helpers & skeletons ---------------- */
+/* ------------------- Utilities ------------------- */
 
-function useDebouncedValue<T>(value: T, delay = 300) {
+function useDebouncedValue<T>(value: T, delay = 300): T {
     const [debounced, setDebounced] = useState(value);
     useEffect(() => {
         const id = setTimeout(() => setDebounced(value), delay);
@@ -151,7 +189,7 @@ function useDebouncedValue<T>(value: T, delay = 300) {
 function ResultsSkeleton() {
     return (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, i) => (
+            {Array.from({ length: PAGE_SIZE }).map((_, i) => (
                 <div key={i} className="rounded-2xl bg-white/5 p-3 ring-1 ring-white/10 backdrop-blur">
                     <Skeleton className="aspect-[2/3] w-full rounded-xl" />
                     <Skeleton className="mt-3 h-4 w-3/4" />
@@ -172,6 +210,22 @@ function RecsSkeleton() {
                     <Skeleton className="mt-2 h-3 w-1/3" />
                 </div>
             ))}
+        </div>
+    );
+}
+
+function ErrorBox({ message }: { message: string }) {
+    return (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+            {message}
+        </div>
+    );
+}
+
+function InfoBox({ message }: { message: string }) {
+    return (
+        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-sm text-white/70">
+            {message}
         </div>
     );
 }

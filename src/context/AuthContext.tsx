@@ -1,60 +1,69 @@
-'use client'
-import React, { createContext, useContext, useState, useEffect } from "react";
-import {UserDetails} from "@/types/auth";
+'use client';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { UserDetails } from '@/types/auth';
+import {useRouter} from "next/navigation";
+import {ROUTES} from "@/lib/constants/routes";
 
 interface AuthContextType {
-    user: any;
-    token: string | null;
-    login: (token: string, refreshToken:string, user: UserDetails) => void;
-    logout: () => void;
+  user: any;
+  token: string | null;
+  refreshToken: string | null;
+  isInitialized: boolean;
+  login: (token: string, refreshToken: string, user: UserDetails) => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [token, setToken] = useState<string | null>(null);
-    const [refreshToken, setRefreshToken] = useState<string | null>(null);
-    const [user, setUser] = useState<UserDetails>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [user, setUser] = useState<UserDetails>(null);
+  const [isInitialized, setInitialized] = useState(false);
+  const router = useRouter();
 
-    // On mount, try to load from localStorage
-    useEffect(() => {
-        const t = localStorage.getItem("accessToken");
-        const rt = localStorage.getItem("refreshToken");
-        const u = localStorage.getItem("user");
-        if (t && u && rt) {
-            setToken(t);
-            setRefreshToken(rt);
-            setUser(JSON.parse(u) as UserDetails);
-        }
-    }, []);
+  // On mount, try to load from localStorage
+  useEffect(() => {
+    const t = localStorage.getItem('accessToken');
+    const rt = localStorage.getItem('refreshToken');
+    const u = localStorage.getItem('user');
+    if (t && u && rt) {
+      setToken(t);
+      setRefreshToken(rt);
+      setUser(JSON.parse(u) as UserDetails);
+    }
 
-    const login = (token: string, refreshToken: string, user: UserDetails) => {
-        setToken(token);
-        setRefreshToken(refreshToken);
-        setUser(user);
-        localStorage.setItem("accessToken", token);
-        localStorage.setItem("refreshToken", refreshToken);
-        localStorage.setItem("user", JSON.stringify(user));
-    };
+    setInitialized(true);
+  }, []);
 
-    const logout = () => {
-        setToken(null);
-        setRefreshToken(null);
-        setUser(null);
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("user");
-    };
+  const login = (token: string, refreshToken: string, user: UserDetails) => {
+    setToken(token);
+    setRefreshToken(refreshToken);
+    setUser(user);
+    localStorage.setItem('accessToken', token);
+    localStorage.setItem('refreshToken', refreshToken);
+    localStorage.setItem('user', JSON.stringify(user));
+  };
 
-    return (
-        <AuthContext.Provider value={{ token, refreshToken, user,  login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  const logout = () => {
+    setToken(null);
+    setRefreshToken(null);
+    setUser(null);
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    router.push(ROUTES.HOME)
+  };
+
+  return (
+    <AuthContext.Provider value={{ token, refreshToken, isInitialized, user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export function useAuth() {
-    const ctx = useContext(AuthContext);
-    if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-    return ctx;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  return ctx;
 }
