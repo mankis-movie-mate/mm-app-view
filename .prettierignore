@@ -1,0 +1,30 @@
+# Ignore build output
+.next/
+out/
+
+# Ignore dependencies
+node_modules/
+
+# Ignore Husky hooks (optional, but you might want hooks unformatted)
+.husky/
+
+# Ignore public assets (SVGs, images)
+public/*.svg
+public/*.png
+public/*.jpg
+public/*.ico
+
+# Ignore config files (optional, usually you want to format configs!)
+# *.config.js
+# *.config.ts
+# *.mjs
+
+# Ignore lock files
+package-lock.json
+yarn.lock
+
+# Ignore Next.js env file
+next-env.d.ts
+
+# Ignore any log files
+*.log
