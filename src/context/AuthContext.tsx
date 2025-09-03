@@ -70,5 +70,4 @@ export function useAuth() {
 export function useRequireUser() {
   const { user } = useAuth();
   return user;
-
 }

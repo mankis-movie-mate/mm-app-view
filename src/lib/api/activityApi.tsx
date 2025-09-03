@@ -2,9 +2,9 @@
 import { fetchApiWithAuth } from './fetchApi';
 import { PaginatedWatchlists, Watchlist } from '@/types/watchlist';
 import { devMockWatchlists } from '@/lib/mock/watchlistMockData';
+import { IS_DEV } from '@/lib/constants/global';
 
 const ACTIVITY_BASE = `${process.env.NEXT_PUBLIC_ACTIVITY_URL}/mm-activity-service`;
-const isDev = process.env.NEXT_PUBLIC_NODE_ENV === 'development';
 
 /**
  * Adds a movie to the user's watchlist
@@ -42,7 +42,7 @@ export async function getUserWatchlists(
   page = 1,
   size = 10,
 ): Promise<PaginatedWatchlists> {
-  if (isDev) {
+  if (IS_DEV) {
     const elements = devMockWatchlists.elements.filter((wl) => wl.username === username);
     const start = (page - 1) * size;
     const paginated = elements.slice(start, start + size);
@@ -69,7 +69,7 @@ export async function getUserWatchlists(
  * ✅ Get one watchlist by its ID
  */
 export async function getWatchlistById(id: string): Promise<Watchlist> {
-  if (isDev) {
+  if (IS_DEV) {
     const watchlist = devMockWatchlists.elements.find((wl) => wl.id === id);
     if (!watchlist) throw new Error(`Watchlist ${id} not found`);
     return watchlist;
@@ -87,7 +87,7 @@ export async function getWatchlistById(id: string): Promise<Watchlist> {
 export async function createWatchlist(
   watchlist: Omit<Watchlist, 'id' | 'updated_date'>,
 ): Promise<Watchlist> {
-  if (isDev) {
+  if (IS_DEV) {
     const newWatchlist: Watchlist = {
       ...watchlist,
       id: 'mock-' + Math.random().toString(36).substring(2),
@@ -109,7 +109,7 @@ export async function createWatchlist(
  * ✅ Update an existing watchlist
  */
 export async function updateWatchlist(id: string, updates: Partial<Watchlist>): Promise<Watchlist> {
-  if (isDev) {
+  if (IS_DEV) {
     const idx = devMockWatchlists.elements.findIndex((wl) => wl.id === id);
     if (idx === -1) throw new Error('Watchlist not found');
     const updated = {
@@ -133,7 +133,7 @@ export async function updateWatchlist(id: string, updates: Partial<Watchlist>): 
  * ✅ Delete watchlist
  */
 export async function deleteWatchlist(id: string): Promise<void> {
-  if (isDev) {
+  if (IS_DEV) {
     const idx = devMockWatchlists.elements.findIndex((wl) => wl.id === id);
     if (idx === -1) throw new Error('Watchlist not found');
     devMockWatchlists.elements.splice(idx, 1);
