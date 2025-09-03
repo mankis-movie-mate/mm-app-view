@@ -19,7 +19,6 @@ The movie recommendation dashboard and user-facing views.
 
 👉 **[Try it on Vercel &nbsp;🌐](https://mm-app-view.vercel.app)**
 
-
 ---
 
 ## 🧩 **Tech Stack**
@@ -28,7 +27,7 @@ The movie recommendation dashboard and user-facing views.
 - [React 18](https://react.dev/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Tailwind CSS](https://tailwindcss.com/)
-- [shadcn/ui](https://ui.shadcn.com/) 
+- [shadcn/ui](https://ui.shadcn.com/)
 - [React Query](https://tanstack.com/query/latest) (data fetching & caching)
 - [Vercel](https://vercel.com/) (cloud hosting)
 - [Docker](https://www.docker.com/) (for K8s self-hosted deployments)
@@ -45,8 +44,6 @@ The movie recommendation dashboard and user-facing views.
 
 ---
 
-
-
 ### **Local Development**
 
 ```sh
@@ -54,3 +51,4 @@ cd mm-app-view
 cp .env.example .env.local      # Fill in your envs!
 npm install
 npm run dev
+```

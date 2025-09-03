@@ -19,8 +19,10 @@ RUN npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
+#Build environment
 ENV NEXT_PUBLIC_API_URL=https://themanki.net/mmate
 ENV NEXT_PUBLIC_AUTH_URL=https://themanki.net/mmate/mm-user-service/users/api/latest/auth
+ENV NEXT_PUBLIC_BASE_PATH=/mmate/view
 
 # Next.js collects build artifacts here:
 COPY --from=builder /app/.next ./.next

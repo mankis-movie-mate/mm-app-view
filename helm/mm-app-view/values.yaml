@@ -12,7 +12,6 @@ service:
   port: 80
   targetPortName: http
 
-
 autoscaling:
   enabled: true
   minReplicas: 1
@@ -23,7 +22,7 @@ containerPort: 3000
 
 ingress:
   enabled: false
-  
+
 resources:
   requests:
     cpu: 350m

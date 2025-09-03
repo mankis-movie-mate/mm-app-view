@@ -17,18 +17,15 @@ spec:
         app.kubernetes.io/name: {{ include "mm-app-view.name" . }}
         app.kubernetes.io/part-of: movie-mate
         app.kubernetes.io/component: frontend
-        io.kompose.network/movie-mate-network: "true"
+        io.kompose.network/movie-mate-network: 'true'
     spec:
       containers:
         - name: {{ include "mm-app-view.name" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
           ports:
             - name: http
               containerPort: {{ .Values.containerPort }}
 
-          env:
-            {{- toYaml .Values.env | nindent 12 }}
+          env: {{- toYaml .Values.env | nindent 12 }}
 
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-
+          resources: {{- toYaml .Values.resources | nindent 12 }}
