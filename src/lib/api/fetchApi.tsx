@@ -27,6 +27,10 @@ export async function fetchApi<T>(input: RequestInfo, init?: RequestInit): Promi
     if (data && typeof data === 'object' && 'message' in data && typeof data.message === 'string') {
       throw new Error(data.message);
     }
+
+    if (data && typeof data === 'object' && 'message' in data && typeof data.message === 'string') {
+      throw new Error(data.message);
+    }
     throw new Error(res.statusText || 'API Error');
 
   }

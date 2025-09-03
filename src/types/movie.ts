@@ -1,4 +1,3 @@
-
 // ───────────────────────────────────────────────────────────────────────────────
 // Core domain types
 // ───────────────────────────────────────────────────────────────────────────────
@@ -86,6 +85,18 @@ export interface RecommendationsResponse {
   userId: string;
   recommended: RecommendedItem[];
 
+}
+
+/**
+ * Pagination wrapper for DetailedMovie lists.
+ */
+export interface PaginatedMovies {
+  pageNo: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  isLast: boolean;
+  elements: DetailedMovie[];
 }
 
 /**

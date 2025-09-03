@@ -28,3 +28,6 @@ next-env.d.ts
 
 # Ignore any log files
 *.log
+
+# Helm chart
+helm/*

@@ -19,7 +19,10 @@ export interface RegisterInput {
 export interface RefreshTokenResponse {
   accessToken: string;
   refreshToken: string;
+
 }
+
+
 
 export async function login(data: LoginInput): Promise<AuthResponse> {
   if (IS_DEV) {
