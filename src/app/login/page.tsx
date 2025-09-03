@@ -6,6 +6,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Spinner } from '@/components/Spinner';
 import { ROUTES } from '@/lib/constants/routes';
+import { getErrorMessage } from '@/lib/utils';
+
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState('');
@@ -19,6 +21,7 @@ export default function LoginPage() {
     e.preventDefault();
     setErr('');
     setLoading(true);
+
     try {
       const { userDetails, accessToken, refreshToken } = await login({
         identifier,
@@ -26,8 +29,8 @@ export default function LoginPage() {
       });
       doLogin(accessToken, refreshToken, userDetails);
       router.push(ROUTES.RECOMMEND);
-    } catch (e: any) {
-      setErr(e.userMessage || e.message || 'Login failed');
+    } catch (err: unknown) {
+      setErr(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -70,7 +73,6 @@ export default function LoginPage() {
               />
             </div>
           </div>
-
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-100">
               Password
@@ -104,7 +106,6 @@ export default function LoginPage() {
             </button>
           </div>
         </form>
-
         <div className="mt-4 text-center">
           <a href={ROUTES.REGISTER} className="text-indigo-400 underline hover:text-indigo-300">
             Don’t have an account? Sign up

@@ -1,12 +1,16 @@
 import type { ApiError } from '@/types/api';
 import { refreshToken as refreshAccessToken } from '@/lib/api/authApi';
-import {ROUTES} from "@/lib/constants/routes";
+import { ROUTES } from '@/lib/constants/routes';
+import { hasErrorCode, hasStatus, hasStringMessage } from '@/lib/utils';
+
 
 // Accepts the request, parses response, throws typed errors
 export async function fetchApi<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   const res = await fetch(input, init);
 
-  let data: any;
+
+  let data: unknown;
+
   try {
     data = await res.json();
   } catch {
@@ -18,8 +22,13 @@ export async function fetchApi<T>(input: RequestInfo, init?: RequestInit): Promi
     console.warn('[API Error]', data);
     if (data && typeof data === 'object' && 'userMessage' in data && 'message' in data) {
       throw data as ApiError;
+
     }
-    throw new Error(data?.message || res.statusText || 'API Error');
+    if (data && typeof data === 'object' && 'message' in data && typeof data.message === 'string') {
+      throw new Error(data.message);
+    }
+    throw new Error(res.statusText || 'API Error');
+
   }
 
   return data as T;
@@ -64,7 +73,8 @@ async function tryRefreshToken(): Promise<boolean> {
 }
 
 export async function fetchApiWithAuth<T>(input: RequestInfo, init: RequestInit = {}): Promise<T> {
-  let token = getAccessToken();
+  const token = getAccessToken();
+
   const headers = mergeHeaders(init.headers, token || undefined);
 
   try {
@@ -72,14 +82,23 @@ export async function fetchApiWithAuth<T>(input: RequestInfo, init: RequestInit 
       ...init,
       headers,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     // Refresh if unauthorized
-    if (err?.message?.includes('401') || err?.status === 401 || err?.errorCode === 401) {
+    if (
+      (hasStringMessage(err) && err.message.includes('400')) ||
+      (hasStatus(err) && err.status === 400) ||
+      (hasErrorCode(err) && err.errorCode === 400)
+    ) {
+
       const didRefresh = await tryRefreshToken();
       if (!didRefresh) {
         console.warn('Redirecting to login...');
         window.location.href = ROUTES.LOGIN;
-        return Promise.reject(new Error('Session expired / token malformed. Redirecting to login.'));
+
+        return Promise.reject(
+          new Error('Session expired / token malformed. Redirecting to login.'),
+        );
+
       }
 
       // Retry the original request with new token
@@ -95,3 +114,4 @@ export async function fetchApiWithAuth<T>(input: RequestInfo, init: RequestInit 
     throw err;
   }
 }
+

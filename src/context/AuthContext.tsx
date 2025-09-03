@@ -1,11 +1,10 @@
 'use client';
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { UserDetails } from '@/types/auth';
-import {useRouter} from "next/navigation";
-import {ROUTES} from "@/lib/constants/routes";
+import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
-  user: any;
+  user: UserDetails | null;
   token: string | null;
   refreshToken: string | null;
   isInitialized: boolean;
@@ -18,7 +17,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
-  const [user, setUser] = useState<UserDetails>(null);
+
+  const [user, setUser] = useState<UserDetails | null>(null);
   const [isInitialized, setInitialized] = useState(false);
   const router = useRouter();
 
@@ -52,7 +52,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
-    router.push(ROUTES.HOME)
   };
 
   return (
@@ -66,4 +65,10 @@ export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
+}
+
+export function useRequireUser() {
+  const { user } = useAuth();
+  return user;
+
 }
