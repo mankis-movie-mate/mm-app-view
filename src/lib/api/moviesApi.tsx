@@ -13,7 +13,6 @@ import { mockRecommendations } from '@/lib/mock/mockRecommendationData';
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
 const MOVIES_URL = `${API}/mm-movie-service/movies`;
 
-
 export async function searchMovies(query: string): Promise<DetailedMovie[]> {
   const q = query.trim().toLowerCase();
   if (!q) return [];
@@ -76,7 +75,7 @@ export async function getAllGenres(): Promise<Genre[]> {
 }
 
 export async function getTopGenres(): Promise<Genre[]> {
-  if (ENV === 'development') {
+  if (IS_DEV) {
     return mockTopGenres;
   }
   return fetchApiWithAuth<Genre[]>(`${MOVIES_URL}/genres/top`);

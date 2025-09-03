@@ -2,10 +2,9 @@
 import { fetchApiWithAuth } from './fetchApi';
 import { PaginatedWatchlists, Watchlist } from '@/types/watchlist';
 import { devMockWatchlists } from '@/lib/mock/watchlistMockData';
-import {IS_DEV} from "@/lib/constants/global";
+import { IS_DEV } from '@/lib/constants/global';
 
 const ACTIVITY_BASE = `${process.env.NEXT_PUBLIC_ACTIVITY_URL}/mm-activity-service`;
-
 
 /**
  * Adds a movie to the user's watchlist
