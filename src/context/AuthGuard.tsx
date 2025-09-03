@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from './AuthContext';
 import { FullScreenLoader } from '@/components/FullScreenLoader';
-import { fetchApi } from '@/lib/api/fetchApi';
 import { ROUTES } from '@/lib/constants/routes';
 
 const PUBLIC_PATHS = [ROUTES.LOGIN, ROUTES.REGISTER, ROUTES.HOME];

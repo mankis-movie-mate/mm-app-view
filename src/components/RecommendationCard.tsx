@@ -1,6 +1,6 @@
 import type { RecommendedItem } from '@/types/movie';
 import MovieCard from './MovieCard';
-import {detailedMovieFromMovie} from "@/types/mapper/watchlistMapper";
+import { detailedMovieFromMovie } from '@/types/mapper/watchlistMapper';
 
 export default function RecommendationCard({ rec }: { rec: RecommendedItem }) {
   const { movie, score, explanations } = rec;
@@ -22,7 +22,7 @@ export default function RecommendationCard({ rec }: { rec: RecommendedItem }) {
       </div>
 
       {/* Why this */}
-      {!isTopMovie && explanations?.length > 0 && (
+      {!isTopMovie && Array.isArray(explanations) && explanations.length > 0 && (
         <details className="mt-3 group">
           <summary className="cursor-pointer list-none text-xs text-white/80 hover:text-white transition">
             Why this recommendation?

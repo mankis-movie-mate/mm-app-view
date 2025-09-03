@@ -7,10 +7,12 @@ import MovieCard from '@/components/MovieCard';
 import RecommendationCard from '@/components/RecommendationCard';
 import { Spinner } from '@/components/Spinner';
 import { Skeleton } from '@/components/Skeleton';
-import { searchMovies, getRecommendations } from '@/lib/api/moviesApi';
-import type { Movie, RecommendationsResponse } from '@/types/movie';
-import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/context/AuthContext';
+import { getRecommendations, searchMovies } from '@/lib/api/moviesApi';
+import type { DetailedMovie, RecommendationsResponse } from '@/types/movie';
+import { useQuery } from '@tanstack/react-query';
+import { useRequireUser } from '@/context/AuthContext';
+import { getErrorMessage } from '@/lib/utils';
+
 const PAGE_SIZE = 8;
 
 export default function RecommendPage() {
@@ -21,7 +23,7 @@ function PageContent() {
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
   const debounced = useDebouncedValue(query, 350);
-  const { user } = useAuth();
+  const user = useRequireUser();
 
   useEffect(() => {
     setPage(1); // reset to first page when query changes
@@ -32,7 +34,7 @@ function PageContent() {
     isFetching: isSearching,
     isError: isSearchError,
     error: searchError,
-  } = useQuery<Movie[]>({
+  } = useQuery<DetailedMovie[]>({
     queryKey: ['movies', 'search', debounced],
     queryFn: () => searchMovies(debounced),
     enabled: debounced.trim().length > 0,
@@ -46,7 +48,7 @@ function PageContent() {
     error: recsError,
   } = useQuery<RecommendationsResponse>({
     queryKey: ['movies', 'recommendations'],
-    queryFn: () => getRecommendations(user.id),
+    queryFn: () => getRecommendations(user!.id),
     staleTime: 60_000,
   });
 
@@ -105,7 +107,7 @@ function PageContent() {
           {isSearching && <ResultsSkeleton />}
 
           {isSearchError && (
-            <ErrorBox message={(searchError as any)?.message ?? 'Failed to load search results.'} />
+            <ErrorBox message={getErrorMessage(searchError) ?? 'Failed to load search results.'} />
           )}
 
           {!isSearching && debounced && results?.length === 0 && (
@@ -115,7 +117,7 @@ function PageContent() {
           {!isSearching && results && results.length > 0 && (
             <>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                {paginatedResults.map((m: Movie) => (
+                {paginatedResults.map((m: DetailedMovie) => (
                   <MovieCard key={m.id} movie={m} />
                 ))}
               </div>
@@ -151,7 +153,7 @@ function PageContent() {
           {isRecsLoading && <RecsSkeleton />}
 
           {isRecsError && (
-            <ErrorBox message={(recsError as any)?.message ?? 'Failed to load recommendations.'} />
+            <ErrorBox message={getErrorMessage(searchError) ?? 'Failed to load recommendations.'} />
           )}
 
           {!isRecsLoading && recs && recs.length > 0 && (

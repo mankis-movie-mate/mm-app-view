@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Spinner } from '@/components/Spinner';
 import { ROUTES } from '@/lib/constants/routes';
+import { getErrorMessage } from '@/lib/utils';
 
 export default function RegisterPage() {
   const [form, setForm] = useState<RegisterInput>({
@@ -31,8 +32,8 @@ export default function RegisterPage() {
       const { userDetails, accessToken, refreshToken } = await register(form);
       doLogin(accessToken, refreshToken, userDetails);
       router.push(ROUTES.RECOMMEND);
-    } catch (e: any) {
-      setErr(e.userMessage || e.message || 'Register failed');
+    } catch (err: unknown) {
+      setErr(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
