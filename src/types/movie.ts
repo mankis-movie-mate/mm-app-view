@@ -11,7 +11,6 @@ export interface Genre {
   name: string;
 }
 
-
 export type ActivityType = 'WATCHLISTED' | 'RATED' | string;
 
 export interface RecommendationExplanation {
@@ -29,7 +28,6 @@ export interface Cast {
 export interface Director {
   firstName: string;
   lastName: string;
-
 }
 
 export interface Review {
@@ -84,7 +82,6 @@ export interface RecommendedItem {
 export interface RecommendationsResponse {
   userId: string;
   recommended: RecommendedItem[];
-
 }
 
 /**

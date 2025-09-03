@@ -12,7 +12,6 @@ import { mockRecommendations } from '@/lib/mock/mockRecommendationData';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
 const MOVIES_URL = `${API}/mm-movie-service/movies`;
-const ENV = process.env.NEXT_PUBLIC_NODE_ENV;
 
 
 export async function searchMovies(query: string): Promise<DetailedMovie[]> {
@@ -41,16 +40,15 @@ export async function getRecommendations(
   return { recommended: [], userId: '' };
 }
 
-
 export async function getMovieById(id: string): Promise<DetailedMovie> {
-  if (ENV === 'development') {
+  if (IS_DEV) {
     return mockDetailedMovie(id);
   }
   return fetchApiWithAuth<DetailedMovie>(`${MOVIES_URL}/${id}`);
 }
 
 export async function getMoviesByIds(ids: string[]): Promise<DetailedMovie[]> {
-  if (ENV === 'development') {
+  if (IS_DEV) {
     return mockDetailedMovies.filter((m) => ids.includes(m.id));
   }
   return fetchApiWithAuth<DetailedMovie[]>(`${MOVIES_URL}/by-ids`, {
@@ -60,7 +58,7 @@ export async function getMoviesByIds(ids: string[]): Promise<DetailedMovie[]> {
 }
 
 export async function getMovieIdsByGenres(genres: string[]): Promise<string[]> {
-  if (ENV === 'development') {
+  if (IS_DEV) {
     // simplistic: take the first genre; expand if you need multi-genre union/intersection
     return mockMovieIdsByGenre[genres[0]] ?? [];
   }
@@ -71,7 +69,7 @@ export async function getMovieIdsByGenres(genres: string[]): Promise<string[]> {
 }
 
 export async function getAllGenres(): Promise<Genre[]> {
-  if (ENV === 'development') {
+  if (IS_DEV) {
     return mockGenres;
   }
   return fetchApiWithAuth<Genre[]>(`${MOVIES_URL}/genres`);
