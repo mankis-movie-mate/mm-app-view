@@ -3,7 +3,6 @@ import { fetchApi } from '@/lib/api/fetchApi';
 import { IS_DEV } from '@/lib/constants/global';
 import { MOCK_AUTH_RESPONSE, MOCK_REFRESH_RESPONSE } from '@/lib/mock/authMockData';
 
-
 export interface LoginInput {
   identifier: string;
   password: string;
@@ -34,7 +33,6 @@ export async function login(data: LoginInput): Promise<AuthResponse> {
   });
 }
 
-
 export async function register(data: RegisterInput): Promise<AuthResponse> {
   if (IS_DEV) {
     return Promise.resolve(MOCK_AUTH_RESPONSE);
@@ -48,7 +46,6 @@ export async function register(data: RegisterInput): Promise<AuthResponse> {
 }
 
 export async function refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
-
   if (IS_DEV) {
     return Promise.resolve(MOCK_REFRESH_RESPONSE);
   }
@@ -60,4 +57,3 @@ export async function refreshToken(refreshToken: string): Promise<RefreshTokenRe
     },
   );
 }
-

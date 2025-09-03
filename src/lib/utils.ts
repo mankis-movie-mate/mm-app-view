@@ -1,4 +1,3 @@
-
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -40,5 +39,4 @@ function hasUserMessage(e: unknown): e is UserMessageError {
     'userMessage' in e &&
     typeof (e as { userMessage: unknown }).userMessage === 'string'
   );
-
 }

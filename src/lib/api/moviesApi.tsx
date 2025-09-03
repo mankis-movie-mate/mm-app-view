@@ -1,4 +1,3 @@
-
 import { fetchApiWithAuth } from '@/lib/api/fetchApi';
 import { DetailedMovie, Genre, RecommendationsResponse } from '@/types/movie';
 import {
