@@ -169,6 +169,7 @@ function PageContent() {
       <Footer />
     </main>
   );
+
 }
 
 /* ------------------- Utilities ------------------- */
@@ -224,4 +225,20 @@ function InfoBox({ message }: { message: string }) {
       {message}
     </div>
   );
+}
+
+function ErrorBox({ message }: { message: string }) {
+    return (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+            {message}
+        </div>
+    );
+}
+
+function InfoBox({ message }: { message: string }) {
+    return (
+        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-sm text-white/70">
+            {message}
+        </div>
+    );
 }

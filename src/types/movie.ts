@@ -1,4 +1,3 @@
-// src/types/movies.ts
 
 // ───────────────────────────────────────────────────────────────────────────────
 // Core domain types
@@ -12,6 +11,7 @@ export interface Genre {
   id: string; // mapped from Mongo _id
   name: string;
 }
+
 
 export type ActivityType = 'WATCHLISTED' | 'RATED' | string;
 
@@ -30,6 +30,7 @@ export interface Cast {
 export interface Director {
   firstName: string;
   lastName: string;
+
 }
 
 export interface Review {
@@ -50,6 +51,7 @@ export interface Rating {
 export interface Movie {
   id: string;
   title: string;
+
   genres: string[]; // <── was string[]
   releaseYear: number;
   rating?: number | null;
@@ -75,6 +77,7 @@ export interface DetailedMovie {
 
 export interface RecommendedItem {
   movie: Movie; // keep as Movie; upgrade to DetailedMovie if you want richer cards
+
   score: number; // 0..1
   explanations: RecommendationExplanation[] | null;
 }
@@ -82,6 +85,7 @@ export interface RecommendedItem {
 export interface RecommendationsResponse {
   userId: string;
   recommended: RecommendedItem[];
+
 }
 
 /**

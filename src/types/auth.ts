@@ -1,7 +1,9 @@
+
 export type UserRole = 'ROOT' | 'ADMIN' | 'MODERATOR' | 'USER' | string;
 
 export interface UserDetails {
   id: number | string;
+
   username: string;
   email: string;
   fullName: string | null;

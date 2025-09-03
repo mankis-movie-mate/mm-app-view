@@ -5,6 +5,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import AuthGuard from '@/context/AuthGuard';
 import ReactQueryProvider from '@/context/QueryClientProvider';
 
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -21,8 +22,8 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children,
-}: Readonly<{
+                                     children,
+                                   }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
