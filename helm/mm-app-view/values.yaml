@@ -3,7 +3,7 @@ replicaCount: 1
 
 image:
   repository: manki1337/mm-app-view
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   tag: latest
 
 service:

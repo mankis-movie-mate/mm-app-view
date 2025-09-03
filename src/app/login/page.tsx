@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Spinner } from '@/components/Spinner';
 import { ROUTES } from '@/lib/constants/routes';
 import { getErrorMessage } from '@/lib/utils';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState('');
@@ -106,9 +107,9 @@ export default function LoginPage() {
           </div>
         </form>
         <div className="mt-4 text-center">
-          <a href={ROUTES.REGISTER} className="text-indigo-400 underline hover:text-indigo-300">
+          <Link href={ROUTES.REGISTER} className="text-indigo-400 underline hover:text-indigo-300">
             Don’t have an account? Sign up
-          </a>
+          </Link>
         </div>
       </div>
     </div>
