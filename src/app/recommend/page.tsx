@@ -169,6 +169,7 @@ function PageContent() {
       <Footer />
     </main>
   );
+
 }
 
 /* ------------------- Utilities ------------------- */

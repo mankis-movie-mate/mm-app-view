@@ -14,6 +14,7 @@ const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
 const MOVIES_URL = `${API}/mm-movie-service/movies`;
 const ENV = process.env.NEXT_PUBLIC_NODE_ENV;
 
+
 export async function searchMovies(query: string): Promise<DetailedMovie[]> {
   const q = query.trim().toLowerCase();
   if (!q) return [];
@@ -39,6 +40,7 @@ export async function getRecommendations(
   }
   return { recommended: [], userId: '' };
 }
+
 
 export async function getMovieById(id: string): Promise<DetailedMovie> {
   if (ENV === 'development') {

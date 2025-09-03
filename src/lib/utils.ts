@@ -39,4 +39,5 @@ function hasUserMessage(e: unknown): e is UserMessageError {
     'userMessage' in e &&
     typeof (e as { userMessage: unknown }).userMessage === 'string'
   );
+
 }

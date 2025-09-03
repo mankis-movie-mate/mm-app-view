@@ -3,9 +3,11 @@ import { refreshToken as refreshAccessToken } from '@/lib/api/authApi';
 import { ROUTES } from '@/lib/constants/routes';
 import { hasErrorCode, hasStatus, hasStringMessage } from '@/lib/utils';
 
+
 // Accepts the request, parses response, throws typed errors
 export async function fetchApi<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   const res = await fetch(input, init);
+
 
   let data: unknown;
 
@@ -20,11 +22,17 @@ export async function fetchApi<T>(input: RequestInfo, init?: RequestInit): Promi
     console.warn('[API Error]', data);
     if (data && typeof data === 'object' && 'userMessage' in data && 'message' in data) {
       throw data as ApiError;
+
     }
     if (data && typeof data === 'object' && 'message' in data && typeof data.message === 'string') {
       throw new Error(data.message);
     }
+
+    if (data && typeof data === 'object' && 'message' in data && typeof data.message === 'string') {
+      throw new Error(data.message);
+    }
     throw new Error(res.statusText || 'API Error');
+
   }
 
   return data as T;
@@ -85,6 +93,7 @@ export async function fetchApiWithAuth<T>(input: RequestInfo, init: RequestInit 
       (hasStatus(err) && err.status === 400) ||
       (hasErrorCode(err) && err.errorCode === 400)
     ) {
+
       const didRefresh = await tryRefreshToken();
       if (!didRefresh) {
         console.warn('Redirecting to login...');
@@ -93,6 +102,7 @@ export async function fetchApiWithAuth<T>(input: RequestInfo, init: RequestInit 
         return Promise.reject(
           new Error('Session expired / token malformed. Redirecting to login.'),
         );
+
       }
 
       // Retry the original request with new token
@@ -108,3 +118,4 @@ export async function fetchApiWithAuth<T>(input: RequestInfo, init: RequestInit 
     throw err;
   }
 }
+

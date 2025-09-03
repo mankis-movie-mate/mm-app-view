@@ -3,6 +3,7 @@ import { fetchApi } from '@/lib/api/fetchApi';
 import { IS_DEV } from '@/lib/constants/global';
 import { MOCK_AUTH_RESPONSE, MOCK_REFRESH_RESPONSE } from '@/lib/mock/authMockData';
 
+
 export interface LoginInput {
   identifier: string;
   password: string;
@@ -18,6 +19,21 @@ export interface RegisterInput {
 export interface RefreshTokenResponse {
   accessToken: string;
   refreshToken: string;
+
+}
+
+export async function login(data: LoginInput): Promise<AuthResponse> {
+  if (IS_DEV) {
+    // Simple mock logic: any user/password succeeds
+    return Promise.resolve(MOCK_AUTH_RESPONSE);
+  }
+
+  return fetchApi<AuthResponse>(`${process.env.NEXT_PUBLIC_AUTH_URL}/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
 }
 
 export async function login(data: LoginInput): Promise<AuthResponse> {
@@ -33,6 +49,7 @@ export async function login(data: LoginInput): Promise<AuthResponse> {
   });
 }
 
+
 export async function register(data: RegisterInput): Promise<AuthResponse> {
   if (IS_DEV) {
     return Promise.resolve(MOCK_AUTH_RESPONSE);
@@ -46,6 +63,7 @@ export async function register(data: RegisterInput): Promise<AuthResponse> {
 }
 
 export async function refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
+
   if (IS_DEV) {
     return Promise.resolve(MOCK_REFRESH_RESPONSE);
   }
@@ -57,3 +75,4 @@ export async function refreshToken(refreshToken: string): Promise<RefreshTokenRe
     },
   );
 }
+

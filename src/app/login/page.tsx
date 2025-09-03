@@ -8,6 +8,7 @@ import { Spinner } from '@/components/Spinner';
 import { ROUTES } from '@/lib/constants/routes';
 import { getErrorMessage } from '@/lib/utils';
 
+
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
