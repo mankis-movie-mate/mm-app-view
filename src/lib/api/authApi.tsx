@@ -1,7 +1,7 @@
 import { AuthResponse } from '@/types/auth';
 import { fetchApi } from '@/lib/api/fetchApi';
 import { IS_DEV } from '@/lib/constants/global';
-import {MOCK_AUTH_RESPONSE, MOCK_REFRESH_RESPONSE} from "@/lib/mock/authMockData";
+import { MOCK_AUTH_RESPONSE, MOCK_REFRESH_RESPONSE } from '@/lib/mock/authMockData';
 
 export interface LoginInput {
   identifier: string;
@@ -19,7 +19,6 @@ export interface RefreshTokenResponse {
   accessToken: string;
   refreshToken: string;
 }
-
 
 export async function login(data: LoginInput): Promise<AuthResponse> {
   if (IS_DEV) {

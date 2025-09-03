@@ -62,7 +62,7 @@ export async function getUserWatchlists(
   // );
   // if (!res.ok) throw new Error('Failed to fetch watchlists');
   // const data = await res.json();
-    return {elements: [], isLast: false, pageNo: 0, pageSize: 0, totalElements: 0, totalPages: 0}
+  return { elements: [], isLast: false, pageNo: 0, pageSize: 0, totalElements: 0, totalPages: 0 };
 }
 
 /**
@@ -78,8 +78,7 @@ export async function getWatchlistById(id: string): Promise<Watchlist> {
   // const res = await fetchApiWithAuth(`${ACTIVITY_BASE}/watchlist/${id}`);
   // if (!res.ok) throw new Error('Failed to fetch watchlist');
   // const data = await res.json();
-    return {id: "", movies_id: [], name: "", updated_date: "", username: ""};
-
+  return { id: '', movies_id: [], name: '', updated_date: '', username: '' };
 }
 
 /**
@@ -103,7 +102,7 @@ export async function createWatchlist(
   //   body: JSON.stringify(watchlist),
   // });
   // const data = await res.json();
-  return {id: "", movies_id: [], name: "", updated_date: "", username: ""};
+  return { id: '', movies_id: [], name: '', updated_date: '', username: '' };
 }
 
 /**
@@ -127,8 +126,7 @@ export async function updateWatchlist(id: string, updates: Partial<Watchlist>): 
   //   body: JSON.stringify(updates),
   // });
   // const data = await res.json();
-    return {id: "", movies_id: [], name: "", updated_date: "", username: ""};
-
+  return { id: '', movies_id: [], name: '', updated_date: '', username: '' };
 }
 
 /**

@@ -8,8 +8,8 @@ import {
   mockMovieIdsByGenre,
   mockTopGenres,
 } from '@/lib/mock/movieMockData';
-import {IS_DEV} from "@/lib/constants/global";
-import {mockRecommendations} from "@/lib/mock/mockRecommendationData";
+import { IS_DEV } from '@/lib/constants/global';
+import { mockRecommendations } from '@/lib/mock/mockRecommendationData';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
 const MOVIES_URL = `${API}/mm-movie-service/movies`;
@@ -23,22 +23,22 @@ export async function searchMovies(query: string): Promise<DetailedMovie[]> {
   return mockDetailedMovies.filter(
     (m) =>
       m.title.toLowerCase().includes(q) ||
-      m.genres.some((g: Genre) =>
-         g.name?.toLowerCase().includes(q),
-      ) ||
+      m.genres.some((g: Genre) => g.name?.toLowerCase().includes(q)) ||
       (m.director.firstName + ' ' + m.director.lastName).toLowerCase().includes(q),
   );
 }
 
-export async function getRecommendations(userId: number | string): Promise<RecommendationsResponse> {
-    if (IS_DEV) {
-        return mockRecommendations
-    }
-    if (userId) {
-        const url = `${API}/mm-recommendation-service/recommend/${userId}?detailed=true`;
-        return fetchApiWithAuth<RecommendationsResponse>(url);
-    }
-    return { recommended: [], userId: "" };
+export async function getRecommendations(
+  userId: number | string,
+): Promise<RecommendationsResponse> {
+  if (IS_DEV) {
+    return mockRecommendations;
+  }
+  if (userId) {
+    const url = `${API}/mm-recommendation-service/recommend/${userId}?detailed=true`;
+    return fetchApiWithAuth<RecommendationsResponse>(url);
+  }
+  return { recommended: [], userId: '' };
 }
 
 export async function getMovieById(id: string): Promise<DetailedMovie> {
