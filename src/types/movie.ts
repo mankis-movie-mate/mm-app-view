@@ -107,3 +107,15 @@ export interface PaginatedMovies {
   isLast: boolean;
   elements: DetailedMovie[];
 }
+
+/**
+ * Pagination wrapper for DetailedMovie lists.
+ */
+export interface PaginatedMovies {
+  pageNo: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  isLast: boolean;
+  elements: DetailedMovie[];
+}
