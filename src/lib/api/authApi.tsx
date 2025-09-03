@@ -22,19 +22,7 @@ export interface RefreshTokenResponse {
 
 }
 
-export async function login(data: LoginInput): Promise<AuthResponse> {
-  if (IS_DEV) {
-    // Simple mock logic: any user/password succeeds
-    return Promise.resolve(MOCK_AUTH_RESPONSE);
-  }
 
-  return fetchApi<AuthResponse>(`${process.env.NEXT_PUBLIC_AUTH_URL}/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-
-}
 
 export async function login(data: LoginInput): Promise<AuthResponse> {
   if (IS_DEV) {
