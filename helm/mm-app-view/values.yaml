@@ -3,7 +3,7 @@ replicaCount: 1
 
 image:
   repository: manki1337/mm-app-view
-  pullPolicy: Always
+  pullPolicy: Always #pull always because of one unified tag
   tag: latest
 
 service:
