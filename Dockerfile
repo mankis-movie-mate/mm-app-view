@@ -18,6 +18,7 @@ RUN npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
+
 # Copy ONLY the standalone output (minimal server, all required files)
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/public ./public
