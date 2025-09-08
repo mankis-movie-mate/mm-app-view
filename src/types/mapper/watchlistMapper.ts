@@ -1,18 +1,42 @@
-import type { DetailedMovie, Movie } from '@/types/movie';
+// Map backend Watchlist to app Watchlist
+import { PaginatedWatchlists, Watchlist } from '@/types/watchlist';
+import { parseMongoDate, parseMongoId } from '@/types/mapper/mongoDbHelper';
 
-// Converts a Movie to a DetailedMovie with reasonable defaults for missing fields
-export function detailedMovieFromMovie(movie: Movie): DetailedMovie {
+export interface BackendWatchlist {
+  _id?: { $oid: string } | string;
+  id?: string;
+  name: string;
+  username: string;
+  movies_id: string[];
+  updated_date?: { $date: string } | string;
+}
+
+export interface BackendPaginatedWatchlists {
+  pageNo?: number;
+  pageSize?: number;
+  totalElements?: number;
+  totalPages?: number;
+  isLast?: boolean;
+  elements: BackendWatchlist[];
+}
+
+export function mapWatchlist(raw: BackendWatchlist): Watchlist {
   return {
-    id: movie.id,
-    title: movie.title,
-    genres: (movie.genres ?? []).map((name, i) => ({ id: `${i}`, name })), // Fakes id
-    director: { firstName: '', lastName: '' }, // Dummy
-    casts: [],
-    synopsis: '',
-    releaseDate: movie.releaseYear ? `${movie.releaseYear}-01-01` : '',
-    language: '',
-    rating: { average: typeof movie.rating === 'number' ? movie.rating : 0, count: 0 },
-    reviews: [],
-    posterUrl: movie.posterUrl ?? null,
+    id: parseMongoId(raw._id ?? raw.id),
+    name: raw.name,
+    username: raw.username,
+    movies_id: Array.isArray(raw.movies_id) ? raw.movies_id : [],
+    updated_date: parseMongoDate(raw.updated_date),
+  };
+}
+
+export function mapPaginatedWatchlists(raw: BackendPaginatedWatchlists): PaginatedWatchlists {
+  return {
+    pageNo: raw.pageNo ?? 1,
+    pageSize: raw.pageSize ?? 10,
+    totalElements: raw.totalElements ?? raw.elements.length,
+    totalPages: raw.totalPages ?? 1,
+    isLast: raw.isLast ?? true,
+    elements: (raw.elements ?? []).map(mapWatchlist),
   };
 }

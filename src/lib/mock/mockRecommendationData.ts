@@ -1,4 +1,4 @@
-import type { RecommendationsResponse } from '@/types/movie';
+import { RecommendationsResponse } from '@/types/recommendation';
 
 export const mockRecommendations: RecommendationsResponse = {
   userId: 'devuser',

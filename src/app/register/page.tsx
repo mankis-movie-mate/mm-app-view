@@ -1,166 +1,318 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { register, RegisterInput } from '@/lib/api/authApi';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Spinner } from '@/components/Spinner';
 import { ROUTES } from '@/lib/constants/routes';
 import { getErrorMessage } from '@/lib/utils';
-import Link from 'next/link';
+import { Eye, EyeOff } from 'lucide-react';
+import Image from 'next/image';
 
-export default function RegisterPage() {
+const RegisterPage: React.FC = () => {
   const [form, setForm] = useState<RegisterInput>({
     username: '',
     email: '',
     password: '',
     phoneNumber: '',
   });
-  const [err, setErr] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [capsOn, setCapsOn] = useState(false);
+  const [errMsg, setErrMsg] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const errorRef = useRef<HTMLDivElement | null>(null);
+
   const { login: doLogin } = useAuth();
   const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  // a11y: focus error region when it appears
+  useEffect(() => {
+    if (errMsg && errorRef.current) errorRef.current.focus();
+  }, [errMsg]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErr('');
-    setLoading(true);
-    try {
-      const { userDetails, accessToken, refreshToken } = await register(form);
-      doLogin(accessToken, refreshToken, userDetails);
-      router.push(ROUTES.RECOMMEND);
-    } catch (err: unknown) {
-      setErr(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  };
+  // single change handler (DRY)
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      // Allow leading spaces only for password (avoid accidental spaces elsewhere)
+      [name]: name === 'password' ? value : value.trimStart(),
+    }));
+  }, []);
+
+  // Basic client-side validation (backend must re-validate)
+  const validate = useCallback((f: RegisterInput): string | null => {
+    if (!f.username.trim() || f.username.length < 3)
+      return 'Username must be at least 3 characters.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) return 'Enter a valid email address.';
+    if (!/^\+?[1-9]\d{6,14}$/.test(f.phoneNumber))
+      return 'Enter a valid phone number in international format.';
+    if (f.password.length < 6) return 'Password must be at least 6 characters.';
+    return null;
+  }, []);
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setErrMsg('');
+
+      const validationError = validate(form);
+      if (validationError) {
+        setErrMsg(validationError);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const { userDetails, accessToken, refreshToken } = await register({
+          username: form.username.trim(),
+          email: form.email.trim(),
+          phoneNumber: form.phoneNumber.trim(),
+          password: form.password, // do not trim passwords
+        });
+        doLogin(accessToken, refreshToken, userDetails);
+        router.push(ROUTES.RECOMMEND);
+      } catch (err: unknown) {
+        setErrMsg(getErrorMessage(err));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [form, doLogin, router, validate],
+  );
+
+  const cardClass =
+    'relative z-10 w-[92%] max-w-md p-8 sm:p-10 rounded-2xl shadow-2xl ' +
+    'bg-white/10 backdrop-blur-lg border border-white/10 ' +
+    (errMsg ? 'animate-shake motion-reduce:animate-none' : '');
 
   return (
-    <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <img
-          width="100"
-          height="100"
-          src="https://img.icons8.com/emoji/100/movie-camera-emoji.png"
-          className="mx-auto h-10 w-auto"
-          alt="MovieMate"
-        />
-        <h2 className="mt-10 text-center text-2xl font-bold tracking-tight text-white">
-          Register your account
-        </h2>
-      </div>
+    <main
+      className="relative min-h-screen flex items-center justify-center
+                 bg-gradient-to-br from-indigo-900 via-slate-900 to-black overflow-hidden
+                 selection:bg-indigo-500/30 selection:text-white"
+      aria-label="Register page"
+    >
+      <div
+        className="absolute inset-0 z-0 pointer-events-none"
+        aria-hidden="true"
+        style={{
+          background:
+            'radial-gradient(circle at 20% 30%, rgba(99,102,241,0.18) 0%, transparent 60%),' +
+            'radial-gradient(circle at 80% 80%, rgba(67,56,202,0.14) 0%, transparent 50%)',
+        }}
+      />
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Glass card */}
+      <section className={cardClass} aria-label="Register card">
+        <header className="flex flex-col items-center">
+          {/* Keep your logo as is (local asset is fine) */}
+          <Image
+            src="https://img.icons8.com/emoji/100/movie-camera-emoji.png"
+            width={72}
+            height={72}
+            alt="MovieMate"
+            className="mb-3"
+            priority
+          />
+          <h1 className="text-3xl font-bold text-white tracking-tight text-center">
+            Create your account ✨
+          </h1>
+          <p className="mt-2 text-sm text-gray-300 text-center max-w-sm leading-6">
+            Join MovieMate to discover what to watch next.
+          </p>
+        </header>
+
+        <form onSubmit={handleSubmit} autoComplete="on" className="mt-6 space-y-5">
           {/* Username */}
-          <div>
+          <div className="space-y-1.5">
             <label htmlFor="username" className="block text-sm font-medium text-gray-100">
               Username
             </label>
-            <div className="mt-2">
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                disabled={loading}
-                autoComplete="username"
-                className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm disabled:opacity-50"
-                value={form.username}
-                onChange={handleChange}
-                placeholder="Your username"
-              />
-            </div>
+            <input
+              id="username"
+              name="username"
+              type="text"
+              required
+              disabled={loading}
+              autoComplete="username"
+              minLength={3}
+              maxLength={32}
+              inputMode="text"
+              spellCheck={false}
+              autoCapitalize="off"
+              className="block w-full rounded-lg border border-white/10 bg-white/10
+                         px-3 py-2 text-base text-white placeholder:text-gray-400 outline-none
+                         focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400/60
+                         transition disabled:opacity-60"
+              value={form.username}
+              onChange={handleChange}
+              placeholder="Your username"
+              aria-required="true"
+              aria-invalid={!!errMsg}
+              aria-describedby={errMsg ? 'register-error' : undefined}
+            />
           </div>
 
           {/* Email */}
-          <div>
+          <div className="space-y-1.5">
             <label htmlFor="email" className="block text-sm font-medium text-gray-100">
               Email
             </label>
-            <div className="mt-2">
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                disabled={loading}
-                autoComplete="email"
-                className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm disabled:opacity-50"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-              />
-            </div>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              disabled={loading}
+              autoComplete="email"
+              inputMode="email"
+              maxLength={254}
+              className="block w-full rounded-lg border border-white/10 bg-white/10
+                         px-3 py-2 text-base text-white placeholder:text-gray-400 outline-none
+                         focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400/60
+                         transition disabled:opacity-60"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="you@example.com"
+              aria-required="true"
+              aria-invalid={!!errMsg}
+              aria-describedby={errMsg ? 'register-error' : undefined}
+            />
           </div>
 
           {/* Phone */}
-          <div>
+          <div className="space-y-1.5">
             <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-100">
               Phone Number
             </label>
-            <div className="mt-2">
-              <input
-                id="phoneNumber"
-                name="phoneNumber"
-                type="tel"
-                required
-                disabled={loading}
-                autoComplete="tel"
-                className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm disabled:opacity-50"
-                value={form.phoneNumber}
-                onChange={handleChange}
-                placeholder="+7813753801990"
-              />
-            </div>
+            <input
+              id="phoneNumber"
+              name="phoneNumber"
+              type="tel"
+              required
+              disabled={loading}
+              autoComplete="tel"
+              inputMode="tel"
+              maxLength={16}
+              // IMPORTANT: use String.raw to avoid invalid escape errors in TSX
+              pattern={String.raw`^\+?[1-9]\d{6,14}$`}
+              title="Use international format, e.g. +123456789"
+              className="block w-full rounded-lg border border-white/10 bg-white/10
+                         px-3 py-2 text-base text-white placeholder:text-gray-400 outline-none
+                         focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400/60
+                         transition disabled:opacity-60"
+              value={form.phoneNumber}
+              onChange={handleChange}
+              placeholder="+123456789"
+              aria-required="true"
+              aria-invalid={!!errMsg}
+              aria-describedby={errMsg ? 'register-error' : undefined}
+            />
           </div>
 
           {/* Password */}
-          <div>
+          <div className="space-y-1.5">
             <label htmlFor="password" className="block text-sm font-medium text-gray-100">
               Password
             </label>
-            <div className="mt-2">
+            <div className="relative">
               <input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 disabled={loading}
                 autoComplete="new-password"
-                className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm disabled:opacity-50"
+                minLength={6}
+                maxLength={72}
+                className="block w-full rounded-lg border border-white/10 bg-white/10
+                           px-3 py-2 pr-10 text-base text-white placeholder:text-gray-400 outline-none
+                           focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400/60
+                           transition disabled:opacity-60"
                 value={form.password}
                 onChange={handleChange}
                 placeholder="Password"
+                aria-required="true"
+                aria-invalid={!!errMsg}
+                aria-describedby={errMsg ? 'register-error' : undefined}
+                onKeyUp={(e) => {
+                  const native = e.nativeEvent as KeyboardEvent;
+                  setCapsOn(native.getModifierState?.('CapsLock') ?? false);
+                }}
               />
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute inset-y-0 right-2 flex items-center p-1 text-gray-400 hover:text-white transition"
+                onClick={() => setShowPassword((v) => !v)}
+                disabled={loading}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
+            {capsOn && (
+              <p className="text-xs text-amber-300/90" role="status">
+                Caps Lock is ON
+              </p>
+            )}
           </div>
 
-          {err && <div className="text-red-400 text-sm">{err}</div>}
-
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex w-full justify-center items-center gap-2 rounded-md bg-indigo-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:opacity-50"
+          {/* Error Message */}
+          {errMsg && (
+            <div
+              id="register-error"
+              ref={errorRef}
+              className="text-red-300 text-sm rounded-md bg-red-950/40 border border-red-400/30 px-3 py-2"
+              role="alert"
+              aria-live="polite"
+              tabIndex={-1}
             >
-              {loading && <Spinner className="h-4 w-4" />}
-              Register
-            </button>
-          </div>
+              {errMsg}
+            </div>
+          )}
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="group relative flex w-full justify-center items-center gap-2 rounded-lg
+                       bg-indigo-600 px-4 py-2 text-base font-semibold text-white
+                       hover:bg-indigo-500 active:bg-indigo-700 transition
+                       focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-400
+                       disabled:opacity-50"
+            aria-busy={loading}
+            aria-disabled={loading}
+          >
+            {/* subtle sheen */}
+            <span className="pointer-events-none absolute inset-0 rounded-lg overflow-hidden">
+              <span
+                className="absolute -inset-[120%] bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.25),transparent)]
+                           translate-x-[-100%] group-hover:translate-x-[100%]
+                           transition-transform duration-700 ease-out"
+              />
+            </span>
+            {loading && <Spinner className="h-5 w-5" />}
+            <span className="relative">Register</span>
+          </button>
         </form>
 
-        <div className="mt-4 text-center">
-          <Link href={ROUTES.LOGIN} className="text-indigo-400 underline hover:text-indigo-300">
-            Already have an account? Sign in
+        <footer className="mt-6 border-t border-white/10 pt-4 text-center">
+          <span className="text-gray-300 mr-1">Already have an account?</span>
+          <Link
+            href={ROUTES.LOGIN}
+            className="text-indigo-400 underline hover:text-indigo-200 font-medium"
+          >
+            Sign in
           </Link>
-        </div>
-      </div>
-    </div>
+        </footer>
+      </section>
+    </main>
   );
-}
+};
+
+export default RegisterPage;

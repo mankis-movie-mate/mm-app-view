@@ -3,7 +3,8 @@ import { refreshToken as refreshAccessToken } from '@/lib/api/authApi';
 import { ROUTES } from '@/lib/constants/routes';
 import { hasErrorCode, hasStatus, hasStringMessage } from '@/lib/utils';
 
-// Accepts the request, parses response, throws typed errors
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 export async function fetchApi<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   const res = await fetch(input, init);
 
@@ -92,7 +93,7 @@ export async function fetchApiWithAuth<T>(input: RequestInfo, init: RequestInit 
       const didRefresh = await tryRefreshToken();
       if (!didRefresh) {
         console.warn('Redirecting to login...');
-        window.location.href = ROUTES.LOGIN;
+        window.location.href = `${BASE}${ROUTES.LOGIN}`;
 
         return Promise.reject(
           new Error('Session expired / token malformed. Redirecting to login.'),

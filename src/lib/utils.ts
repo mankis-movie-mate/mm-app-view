@@ -1,8 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-const IS_DEV = process.env.NEXT_PUBLIC_NODE_ENV === 'development';
-
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

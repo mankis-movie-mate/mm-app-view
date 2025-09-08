@@ -1,24 +1,41 @@
 import { fetchApiWithAuth } from '@/lib/api/fetchApi';
-import { DetailedMovie, Genre, RecommendationsResponse } from '@/types/movie';
+import { DetailedMovie, Genre, PaginatedMovies } from '@/types/movie';
 import {
   mockDetailedMovie,
   mockDetailedMovies,
   mockGenres,
-  mockMovieIdsByGenre,
   mockTopGenres,
 } from '@/lib/mock/movieMockData';
 import { IS_DEV } from '@/lib/constants/global';
-import { mockRecommendations } from '@/lib/mock/mockRecommendationData';
+import {
+  BackendMovie,
+  BackendPaginatedMovies,
+  mapBackendMovie,
+  mapBackendMovies,
+} from '@/types/mapper/movieMapper';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
-const MOVIES_URL = `${API}/mm-movie-service/movies`;
+const MOVIES_URL = `${API}/mm-movie-service/api`;
 
+export async function getAllMovies(page = 1, pageSize = 8): Promise<PaginatedMovies> {
+  const res = await fetchApiWithAuth<BackendPaginatedMovies>(
+    `${MOVIES_URL}/all?page=${page}&pageSize=${pageSize}`,
+    { method: 'GET' },
+  );
+  return {
+    pageNo: res.pageNo ?? 1,
+    pageSize: res.pageSize ?? pageSize,
+    totalElements: res.totalElements ?? res.elements?.length ?? 0,
+    totalPages: res.totalPages ?? 1,
+    isLast: res.isLast ?? true,
+    elements: mapBackendMovies(res.elements),
+  };
+}
 
 export async function searchMovies(query: string): Promise<DetailedMovie[]> {
   const q = query.trim().toLowerCase();
   if (!q) return [];
 
-  // Simple: search in title, genres, and director
   return mockDetailedMovies.filter(
     (m) =>
       m.title.toLowerCase().includes(q) ||
@@ -27,46 +44,27 @@ export async function searchMovies(query: string): Promise<DetailedMovie[]> {
   );
 }
 
-export async function getRecommendations(
-  userId: number | string,
-): Promise<RecommendationsResponse> {
+export async function getMoviesByIds(ids: string[]): Promise<DetailedMovie[]> {
   if (IS_DEV) {
-    return mockRecommendations;
+    return mockDetailedMovies.filter((m) => ids.includes(m.id));
   }
-  if (userId) {
-    const url = `${API}/mm-recommendation-service/recommend/${userId}?detailed=true`;
-    return fetchApiWithAuth<RecommendationsResponse>(url);
-  }
-  return { recommended: [], userId: '' };
-}
+  if (!ids?.length) return [];
 
+  const res = await fetchApiWithAuth<BackendMovie[]>(`${MOVIES_URL}/all-by-ids`, {
+    method: 'POST',
+    body: JSON.stringify({ ids }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  return mapBackendMovies(res);
+}
 
 export async function getMovieById(id: string): Promise<DetailedMovie> {
   if (IS_DEV) {
     return mockDetailedMovie(id);
   }
-  return fetchApiWithAuth<DetailedMovie>(`${MOVIES_URL}/${id}`);
-}
-
-export async function getMoviesByIds(ids: string[]): Promise<DetailedMovie[]> {
-  if (IS_DEV) {
-    return mockDetailedMovies.filter((m) => ids.includes(m.id));
-  }
-  return fetchApiWithAuth<DetailedMovie[]>(`${MOVIES_URL}/by-ids`, {
-    method: 'POST',
-    body: JSON.stringify({ ids }),
-  });
-}
-
-export async function getMovieIdsByGenres(genres: string[]): Promise<string[]> {
-  if (IS_DEV) {
-    // simplistic: take the first genre; expand if you need multi-genre union/intersection
-    return mockMovieIdsByGenre[genres[0]] ?? [];
-  }
-  return fetchApiWithAuth<string[]>(`${MOVIES_URL}/by-genres`, {
-    method: 'POST',
-    body: JSON.stringify({ genres }),
-  });
+  const res = await fetchApiWithAuth<BackendMovie>(`${MOVIES_URL}/${id}`);
+  return mapBackendMovie(res);
 }
 
 export async function getAllGenres(): Promise<Genre[]> {
