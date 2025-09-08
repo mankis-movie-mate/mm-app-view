@@ -43,6 +43,7 @@ export interface DetailedMovie {
   posterUrl?: string | null;
 }
 
+
 export interface PaginatedMovies {
   pageNo: number;
   pageSize: number;

@@ -59,9 +59,11 @@ export async function getMoviesByIds(ids: string[]): Promise<DetailedMovie[]> {
   return mapBackendMovies(res);
 }
 
+
 export async function getMovieById(id: string): Promise<DetailedMovie> {
   if (IS_DEV) {
     return mockDetailedMovie(id);
+
   }
   const res = await fetchApiWithAuth<BackendMovie>(`${MOVIES_URL}/${id}`);
   return mapBackendMovie(res);

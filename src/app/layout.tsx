@@ -6,6 +6,7 @@ import AuthGuard from '@/context/AuthGuard';
 import ReactQueryProvider from '@/context/QueryClientProvider';
 import { Toaster } from '@/components/ui/sonner';
 
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],

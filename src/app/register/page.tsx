@@ -11,6 +11,7 @@ import { getErrorMessage } from '@/lib/utils';
 import { Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 
+
 const RegisterPage: React.FC = () => {
   const [form, setForm] = useState<RegisterInput>({
     username: '',
@@ -312,6 +313,7 @@ const RegisterPage: React.FC = () => {
         </footer>
       </section>
     </main>
+
   );
 };
 

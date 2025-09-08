@@ -12,6 +12,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 
 const LoginPage: React.FC = () => {
+
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [errMsg, setErrMsg] = useState('');
@@ -208,6 +209,7 @@ const LoginPage: React.FC = () => {
             className="text-indigo-400 underline hover:text-indigo-200 font-medium"
           >
             Sign up
+
           </Link>
         </div>
       </section>

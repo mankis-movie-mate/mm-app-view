@@ -17,6 +17,7 @@ import {
 
 const ACTIVITY_BASE = `${process.env.NEXT_PUBLIC_API_URL}/mm-activity-service/api`;
 
+
 /** --- WATCHLIST API --- **/
 export async function getUserWatchlists(
   username: string,
