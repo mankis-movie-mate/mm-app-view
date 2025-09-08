@@ -1,6 +1,6 @@
-import type { RecommendedItem } from '@/types/movie';
-import MovieCard from './MovieCard';
-import { detailedMovieFromMovie } from '@/types/mapper/watchlistMapper';
+import MovieCard from '../movie/MovieCard';
+import { RecommendedItem } from '@/types/recommendation';
+import { detailedMovieFromMovie } from '@/types/mapper/movieMapper';
 
 export default function RecommendationCard({ rec }: { rec: RecommendedItem }) {
   const { movie, score, explanations } = rec;

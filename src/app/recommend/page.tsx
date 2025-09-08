@@ -3,23 +3,21 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import MovieCard from '@/components/MovieCard';
-import RecommendationCard from '@/components/RecommendationCard';
+import MovieCard from '@/components/movie/MovieCard';
+import RecommendationCard from '@/components/recommendation/RecommendationCard';
 import { Spinner } from '@/components/Spinner';
 import { Skeleton } from '@/components/Skeleton';
-import { getRecommendations, searchMovies } from '@/lib/api/moviesApi';
-import type { DetailedMovie, RecommendationsResponse } from '@/types/movie';
+import { getAllMovies, searchMovies } from '@/lib/api/moviesApi';
+import type { DetailedMovie, PaginatedMovies } from '@/types/movie';
 import { useQuery } from '@tanstack/react-query';
 import { useRequireUser } from '@/context/AuthContext';
 import { getErrorMessage } from '@/lib/utils';
+import { getRecommendations } from '@/lib/api/recommendationApi';
+import { RecommendationsResponse } from '@/types/recommendation';
 
 const PAGE_SIZE = 8;
 
 export default function RecommendPage() {
-  return <PageContent />;
-}
-
-function PageContent() {
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
   const debounced = useDebouncedValue(query, 350);
@@ -29,8 +27,9 @@ function PageContent() {
     setPage(1); // reset to first page when query changes
   }, [debounced]);
 
+  // 1. Fetch search results (enabled only if searching)
   const {
-    data: results,
+    data: searchResults,
     isFetching: isSearching,
     isError: isSearchError,
     error: searchError,
@@ -41,6 +40,20 @@ function PageContent() {
     staleTime: 30_000,
   });
 
+  // 2. Fetch paginated all-movies (enabled only if NOT searching)
+  const {
+    data: allMovies,
+    isFetching: isLoadingAllMovies,
+    isError: isAllMoviesError,
+    error: allMoviesError,
+  } = useQuery<PaginatedMovies>({
+    queryKey: ['movies', 'all', page, PAGE_SIZE],
+    queryFn: () => getAllMovies(page, PAGE_SIZE),
+    enabled: debounced.trim().length === 0,
+    staleTime: 30_000,
+  });
+
+  // 3. Recommendations as before
   const {
     data: recResp,
     isFetching: isRecsLoading,
@@ -54,18 +67,34 @@ function PageContent() {
 
   const recs = recResp?.recommended ?? [];
 
-  const paginatedResults = useMemo(() => {
-    if (!results) return [];
-    const start = (page - 1) * PAGE_SIZE;
-    return results.slice(start, start + PAGE_SIZE);
-  }, [results, page]);
+  // 4. Get movies to display: prefer searchResults if searching, otherwise allMovies.elements
+  const moviesToShow = useMemo(() => {
+    if (debounced.trim().length > 0) {
+      return searchResults || [];
+    } else {
+      return allMovies?.elements || [];
+    }
+  }, [debounced, searchResults, allMovies]);
 
+  // 5. Total pages logic
   const totalPages = useMemo(() => {
-    return results ? Math.ceil(results.length / PAGE_SIZE) : 0;
-  }, [results]);
+    if (debounced.trim().length > 0) return 1; // If searching, all results on one page (or you can implement search pagination)
+    return allMovies?.totalPages ?? 0;
+  }, [debounced, allMovies]);
+
+  // 6. Loading/Error states
+  const isLoading = debounced.trim().length > 0 ? isSearching : isLoadingAllMovies;
+  const isError = debounced.trim().length > 0 ? isSearchError : isAllMoviesError;
+  const errorMsg =
+    debounced.trim().length > 0
+      ? (getErrorMessage(searchError) ?? 'Failed to load search results.')
+      : (getErrorMessage(allMoviesError) ?? 'Failed to load movies.');
 
   return (
-    <main className="relative min-h-[100svh] overflow-hidden bg-gradient-to-b from-indigo-950 via-slate-950 to-black text-white">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-indigo-950 via-slate-950 to-black text-white">
+      <header className="sticky top-0 z-40 bg-indigo-950/80 backdrop-blur border-b border-white/10">
+        <Header />
+      </header>
       <div
         aria-hidden
         className="pointer-events-none absolute -top-40 right-[-20%] h-[480px] w-[480px] rounded-full bg-indigo-600/25 blur-3xl"
@@ -74,105 +103,106 @@ function PageContent() {
         aria-hidden
         className="pointer-events-none absolute -bottom-40 left-[-10%] h-[520px] w-[520px] rounded-full bg-fuchsia-600/20 blur-3xl"
       />
-
-      <Header />
-
-      {/* Search */}
-      <section className="mx-auto max-w-6xl px-6 pt-4">
-        <div className="flex items-center gap-3">
-          <div className="relative w-full">
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search movies"
-              className="w-full rounded-2xl bg-white/10 px-5 py-3 text-base text-white placeholder:text-white/50 outline-none ring-1 ring-white/15 focus:ring-2 focus:ring-indigo-400 transition"
-            />
-            {isSearching && (
-              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-                <Spinner className="h-5 w-5 border-indigo-300" />
-              </div>
+      <main className="flex-1 mx-auto w-full max-w-6xl px-6 pb-8 pt-4">
+        <section>
+          <div className="flex items-center gap-3">
+            <div className="relative w-full">
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search movies"
+                className="w-full rounded-2xl bg-white/10 px-5 py-3 text-base text-white placeholder:text-white/50 outline-none ring-1 ring-white/15 focus:ring-2 focus:ring-indigo-400 transition"
+                aria-label="Search movies"
+              />
+              {isLoading && (
+                <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+                  <Spinner className="h-5 w-5 border-indigo-300" />
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+        <section className="grid grid-cols-1 gap-6 pt-6 md:grid-cols-[1fr_270px]">
+          <div>
+            <h2 className="mb-3 text-sm font-semibold text-white/70">
+              {debounced ? `Results for “${debounced}”` : 'All Movies'}
+            </h2>
+            {isLoading && <ResultsSkeleton />}
+            {isError && <ErrorBox message={errorMsg} />}
+            {!isLoading && debounced && moviesToShow.length === 0 && (
+              <InfoBox message="No results. Try a different query (e.g. “space drama”, “thriller 2019”)." />
+            )}
+            {!isLoading && moviesToShow.length > 0 && (
+              <>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                  {moviesToShow.map((m: DetailedMovie) => (
+                    <MovieCard key={m.id} movie={m} />
+                  ))}
+                </div>
+                {/* Pagination: only for all-movies */}
+                {debounced.trim().length === 0 && (
+                  <div className="mt-6 flex justify-center gap-3 text-sm">
+                    <button
+                      disabled={page <= 1}
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      className="rounded-lg border border-white/20 px-4 py-1.5 text-white/80 hover:bg-white/10 disabled:opacity-50"
+                    >
+                      Prev
+                    </button>
+                    <span className="self-center text-white/60">
+                      Page {page} of {totalPages}
+                    </span>
+                    <button
+                      disabled={page >= totalPages}
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      className="rounded-lg border border-white/20 px-4 py-1.5 text-white/80 hover:bg-white/10 disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
-        </div>
-      </section>
+          <aside className="relative md:sticky md:top-[88px]">
+            <div className="mb-2 flex items-center gap-2">
+              <span className="inline-flex items-center rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+                Picks
+              </span>
+              <h2 className="text-sm font-semibold text-white/85">Recommended for you</h2>
+            </div>
 
-      {/* Main section */}
-      <section className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-6 pb-8 pt-6 md:grid-cols-[1fr_270px]">
-        {/* Search Results */}
-        <div>
-          <h2 className="mb-3 text-sm font-semibold text-white/70">
-            {debounced ? `Results for “${debounced}”` : 'Try a search to see results'}
-          </h2>
+            {isRecsLoading && <RecsSkeleton />}
+            {isRecsError && (
+              <ErrorBox message={getErrorMessage(recsError) ?? 'Failed to load recommendations.'} />
+            )}
 
-          {isSearching && <ResultsSkeleton />}
-
-          {isSearchError && (
-            <ErrorBox message={getErrorMessage(searchError) ?? 'Failed to load search results.'} />
-          )}
-
-          {!isSearching && debounced && results?.length === 0 && (
-            <InfoBox message="No results. Try a different query (e.g. “space drama”, “thriller 2019”)." />
-          )}
-
-          {!isSearching && results && results.length > 0 && (
-            <>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                {paginatedResults.map((m: DetailedMovie) => (
-                  <MovieCard key={m.id} movie={m} />
+            {!isRecsLoading && recs?.length > 0 && (
+              <div className="space-y-3">
+                {recs.slice(0, 6).map((rec) => (
+                  <div key={`rec-${rec.movie.id}`} className="relative">
+                    <div
+                      aria-hidden
+                      className="absolute left-0 top-0 bottom-0 w-[2px] rounded-full bg-gradient-to-b from-fuchsia-400/70 to-indigo-400/70"
+                    />
+                    <div className="pl-3">
+                      <RecommendationCard rec={rec} />
+                    </div>
+                  </div>
                 ))}
               </div>
-
-              {/* Pagination */}
-              <div className="mt-6 flex justify-center gap-3 text-sm">
-                <button
-                  disabled={page <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="rounded-lg border border-white/20 px-4 py-1.5 text-white/80 hover:bg-white/10 disabled:opacity-50"
-                >
-                  Prev
-                </button>
-                <span className="self-center text-white/60">
-                  Page {page} of {totalPages}
-                </span>
-                <button
-                  disabled={page >= totalPages}
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  className="rounded-lg border border-white/20 px-4 py-1.5 text-white/80 hover:bg-white/10 disabled:opacity-50"
-                >
-                  Next
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Recommendations */}
-        <aside className="md:sticky md:top-[88px]">
-          <h2 className="mb-3 text-sm font-semibold text-white/70">Recommended for you</h2>
-
-          {isRecsLoading && <RecsSkeleton />}
-
-          {isRecsError && (
-            <ErrorBox message={getErrorMessage(searchError) ?? 'Failed to load recommendations.'} />
-          )}
-
-          {!isRecsLoading && recs && recs.length > 0 && (
-            <div className="grid grid-cols-1 gap-4">
-              {recs.slice(0, 6).map((rec) => (
-                <RecommendationCard key={`rec-${rec.movie.id}`} rec={rec} />
-              ))}
-            </div>
-          )}
-        </aside>
-      </section>
-
-      <Footer />
-    </main>
+            )}
+          </aside>
+        </section>
+      </main>
+      <footer className="mt-auto">
+        <Footer />
+      </footer>
+    </div>
   );
 }
 
-/* ------------------- Utilities ------------------- */
-
+/* --- Utilities and skeletons as in your code --- */
 function useDebouncedValue<T>(value: T, delay = 300): T {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {

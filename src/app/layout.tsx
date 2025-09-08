@@ -4,6 +4,8 @@ import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import AuthGuard from '@/context/AuthGuard';
 import ReactQueryProvider from '@/context/QueryClientProvider';
+import { Toaster } from '@/components/ui/sonner';
+
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -17,7 +19,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'MovieMate',
-  description: 'Personalized move',
+  description: 'Personalized movie recommendations',
 };
 
 export default function RootLayout({
@@ -31,6 +33,7 @@ export default function RootLayout({
         <ReactQueryProvider>
           <AuthProvider>
             <AuthGuard>{children}</AuthGuard>
+            <Toaster richColors expand={true} position="top-center" />
           </AuthProvider>
         </ReactQueryProvider>
       </body>

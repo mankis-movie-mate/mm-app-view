@@ -28,12 +28,11 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         setLoading(false);
         return;
       }
-
-      router.push(ROUTES.LOGIN);
+      router.push(`${ROUTES.LOGIN}`);
     };
 
     ensureAuth();
-  }, [pathname, isInitialized, token]);
+  }, [pathname, isInitialized, token, router]);
 
   if (!isInitialized || isLoading) return <FullScreenLoader />;
   return <>{children}</>;

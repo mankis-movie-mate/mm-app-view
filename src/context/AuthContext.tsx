@@ -1,7 +1,6 @@
 'use client';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { UserDetails } from '@/types/auth';
-import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
   user: UserDetails | null;
@@ -20,7 +19,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [user, setUser] = useState<UserDetails | null>(null);
   const [isInitialized, setInitialized] = useState(false);
-  const router = useRouter();
 
   // On mount, try to load from localStorage
   useEffect(() => {
