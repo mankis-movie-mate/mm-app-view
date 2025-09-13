@@ -61,7 +61,7 @@ export default function RecommendPage() {
     error: recsError,
   } = useQuery<RecommendationsResponse>({
     queryKey: ['movies', 'recommendations'],
-    queryFn: () => getRecommendations(user!.id),
+    queryFn: () => getRecommendations(user!.username),
     staleTime: 60_000,
   });
 
