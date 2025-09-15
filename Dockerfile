@@ -7,7 +7,7 @@ RUN npm install
 COPY . .
 
 # Envs used at build time
-ENV NEXT_PUBLIC_BASE_PATH="/mmate/view"
+ENV NEXT_PUBLIC_BASE_PATH="/web/mmate/view"
 ENV NEXT_PUBLIC_NODE_ENV="production"
 ENV NEXT_PUBLIC_API_URL="https://themanki.net/mmate"
 ENV NEXT_PUBLIC_AUTH_URL="https://themanki.net/mmate/mm-user-service/users/api/latest/auth"
