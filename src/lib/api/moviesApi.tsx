@@ -17,10 +17,12 @@ import {
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
 const MOVIES_URL = `${API}/mm-movie-service/api`;
 
+
 export async function getAllMovies(page = 1, pageSize = 8): Promise<PaginatedMovies> {
   const res = await fetchApiWithAuth<BackendPaginatedMovies>(
     `${MOVIES_URL}/all?page=${page}&pageSize=${pageSize}`,
     { method: 'GET' },
+
   );
   return {
     pageNo: res.pageNo ?? 1,
@@ -32,17 +34,44 @@ export async function getAllMovies(page = 1, pageSize = 8): Promise<PaginatedMov
   };
 }
 
-export async function searchMovies(query: string): Promise<DetailedMovie[]> {
-  const q = query.trim().toLowerCase();
-  if (!q) return [];
 
-  return mockDetailedMovies.filter(
-    (m) =>
-      m.title.toLowerCase().includes(q) ||
-      m.genres.some((g: Genre) => g.name?.toLowerCase().includes(q)) ||
-      (m.director.firstName + ' ' + m.director.lastName).toLowerCase().includes(q),
-  );
+interface SearchMoviesOptions {
+    page?: number;
+    limit?: number;
 }
+
+export async function searchMovies(
+    query: string,
+    opts: SearchMoviesOptions = {}
+): Promise<PaginatedMovies> {
+    const q = query.trim();
+    if (q.length < 2) {
+        return {
+            pageNo: 1,
+            pageSize: opts.limit || 5,
+            totalElements: 0,
+            totalPages: 1,
+            isLast: true,
+            elements: [],
+        };
+    }
+
+    const page = opts.page || 1;
+    const limit = opts.limit || 20;
+    const url = `${MOVIES_URL}/search/movie?query=${encodeURIComponent(q)}&page=${page}&limit=${limit}`;
+
+    const res = await fetchApiWithAuth<BackendPaginatedMovies>(url, { method: 'GET' });
+
+    return {
+        pageNo: res.pageNo ?? 1,
+        pageSize: res.pageSize ?? limit,
+        totalElements: res.totalElements ?? res.elements?.length ?? 0,
+        totalPages: res.totalPages ?? 1,
+        isLast: res.isLast ?? true,
+        elements: mapBackendMovies(res.elements || []),
+    };
+}
+
 
 export async function getMoviesByIds(ids: string[]): Promise<DetailedMovie[]> {
   if (IS_DEV) {

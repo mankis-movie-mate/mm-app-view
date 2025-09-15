@@ -55,21 +55,33 @@ export function Summary({
       <dl className="grid grid-cols-1 gap-2 text-white/85 sm:grid-cols-2">
         <MetaRow label="Director" value={directorName} />
         <CastRow cast={castNames} />
-        <MetaRow
-          label="Community Rating"
-          value={
-            ratings.length > 0 ? (
-              <span className="inline-flex items-center gap-1">
-                {renderStars(Math.round(Number(averageRatingText)))}
-                <span className="ml-1 text-xs text-white/70">({ratings.length})</span>
-              </span>
-            ) : isRatingsLoading ? (
-              <Spinner className="inline h-4 w-4" />
-            ) : (
-              '—'
-            )
-          }
-        />
+
+          <MetaRow
+              label="Community Rating"
+              value={
+                  ratings.length > 0 ? (
+                      <span className="inline-flex items-center gap-1">
+        {renderStars(Math.round(Number(averageRatingText)))}
+                          <span className="ml-1 text-xs text-white/70">
+          ({ratings.length})
+        </span>
+      </span>
+                  ) : typeof movie.rating?.average === 'number' ? (
+                      <span className="inline-flex items-center gap-1">
+        {renderStars(Math.round(movie.rating.average))}
+                          <span className="ml-1 text-xs text-white/70">
+          ({movie.rating.count ?? 0})
+        </span>
+      </span>
+                  ) : isRatingsLoading ? (
+                      <Spinner className="inline h-4 w-4" />
+                  ) : (
+                      '—'
+                  )
+              }
+          />
+
+
       </dl>
 
       <div className="pt-2">
