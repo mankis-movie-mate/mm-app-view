@@ -55,6 +55,7 @@ export function Summary({
       <dl className="grid grid-cols-1 gap-2 text-white/85 sm:grid-cols-2">
         <MetaRow label="Director" value={directorName} />
         <CastRow cast={castNames} />
+
           <MetaRow
               label="Community Rating"
               value={
@@ -79,6 +80,7 @@ export function Summary({
                   )
               }
           />
+
 
       </dl>
 

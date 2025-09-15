@@ -17,10 +17,12 @@ import {
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
 const MOVIES_URL = `${API}/mm-movie-service/api`;
 
+
 export async function getAllMovies(page = 1, pageSize = 8): Promise<PaginatedMovies> {
   const res = await fetchApiWithAuth<BackendPaginatedMovies>(
     `${MOVIES_URL}/all?page=${page}&pageSize=${pageSize}`,
     { method: 'GET' },
+
   );
   return {
     pageNo: res.pageNo ?? 1,
@@ -31,6 +33,7 @@ export async function getAllMovies(page = 1, pageSize = 8): Promise<PaginatedMov
     elements: mapBackendMovies(res.elements),
   };
 }
+
 
 interface SearchMoviesOptions {
     page?: number;
@@ -68,6 +71,7 @@ export async function searchMovies(
         elements: mapBackendMovies(res.elements || []),
     };
 }
+
 
 export async function getMoviesByIds(ids: string[]): Promise<DetailedMovie[]> {
   if (IS_DEV) {
